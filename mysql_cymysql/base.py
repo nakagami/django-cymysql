@@ -44,14 +44,14 @@ IntegrityError = Database.IntegrityError
 # It's impossible to import datetime_or_None directly from MySQLdb.times
 parse_datetime = decoders[FIELD_TYPE.DATETIME]
 
-def parse_datetime_with_timezone_support(value):
+def parse_datetime_with_timezone_support(value,  charset=None, field=None, use_unicode=None):
     dt = parse_datetime(value)
     # Confirm that dt is naive before overwriting its tzinfo.
     if dt is not None and settings.USE_TZ and timezone.is_naive(dt):
         dt = dt.replace(tzinfo=timezone.utc)
     return dt
 
-def adapt_datetime_with_timezone_support(value, conv):
+def adapt_datetime_with_timezone_support(value,  charset=None, field=None, use_unicode=None):
     # Equivalent to DateTimeField.get_db_prep_value. Used only by raw SQL.
     if settings.USE_TZ:
         if timezone.is_naive(value):
