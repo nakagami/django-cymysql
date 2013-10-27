@@ -11,7 +11,7 @@ import sys
 import warnings
 
 import cymysql as Database
-from cymysql.converters import decoders, escape_str
+from cymysql.converters import decoders, escape_string
 from cymysql.constants import FIELD_TYPE, CLIENT
 
 from django.utils.functional import cached_property
@@ -25,10 +25,10 @@ except ImportError:
 from django.conf import settings
 from django.db import utils
 from django.db.backends import *
-from django.db.backends.mysql.client import DatabaseClient
-from django.db.backends.mysql.creation import DatabaseCreation
-from django.db.backends.mysql.introspection import DatabaseIntrospection
-from django.db.backends.mysql.validation import DatabaseValidation
+from mysql_cymysql.client import DatabaseClient
+from mysql_cymysql.creation import DatabaseCreation
+from mysql_cymysql.introspection import DatabaseIntrospection
+from mysql_cymysql.validation import DatabaseValidation
 from django.utils.encoding import force_str, force_text
 from django.utils.safestring import SafeBytes, SafeText
 from django.utils import six
@@ -61,15 +61,24 @@ def adapt_datetime_with_timezone_support(value, conv):
             default_timezone = timezone.get_default_timezone()
             value = timezone.make_aware(value, default_timezone)
         value = value.astimezone(timezone.utc).replace(tzinfo=None)
-    return Thing2Literal(value.strftime("%Y-%m-%d %H:%M:%S"), conv)
+    return value.strftime("%Y-%m-%d %H:%M:%S")
 
-django_conversions = {
+# MySQLdb-1.2.1 returns TIME columns as timedelta -- they are more like
+# timedelta in terms of actual behavior as they are signed and include days --
+# and Django expects time, so we still need to override that. We also need to
+# add special handling for SafeText and SafeBytes as MySQLdb's type
+# checking is too tight to catch those (see Django ticket #6052).
+# Finally, MySQLdb always returns naive datetime objects. However, when
+# timezone support is active, Django expects timezone-aware datetime objects.
+django_conversions = decoders.copy()
+django_conversions.update({
     FIELD_TYPE.TIME: util.typecast_time,
     FIELD_TYPE.DECIMAL: util.typecast_decimal,
     FIELD_TYPE.NEWDECIMAL: util.typecast_decimal,
     FIELD_TYPE.DATETIME: parse_datetime_with_timezone_support,
     datetime.datetime: adapt_datetime_with_timezone_support,
-}
+})
+
 
 # This should match the numerical portion of the version numbers (we can treat
 # versions like 5.0.24 and 5.0.24a as the same). Based on the list of version
