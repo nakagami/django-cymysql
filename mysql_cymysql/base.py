@@ -1,7 +1,7 @@
 """
 MySQL database backend for Django.
 
-Requires MySQLdb: http://sourceforge.net/projects/mysql-python
+Requires CyMySQL: https://github.com/nakagami/CyMySQL
 """
 from __future__ import unicode_literals
 
@@ -10,25 +10,12 @@ import re
 import sys
 import warnings
 
-try:
-    import MySQLdb as Database
-except ImportError as e:
-    from django.core.exceptions import ImproperlyConfigured
-    raise ImproperlyConfigured("Error loading MySQLdb module: %s" % e)
+import cymysql as Database
+from cymysql.converters import decoders, escape_str
+from cymysql.constants import FIELD_TYPE, CLIENT
 
 from django.utils.functional import cached_property
 
-# We want version (1, 2, 1, 'final', 2) or later. We can't just use
-# lexicographic ordering in this check because then (1, 2, 1, 'gamma')
-# inadvertently passes the version test.
-version = Database.version_info
-if (version < (1, 2, 1) or (version[:3] == (1, 2, 1) and
-        (len(version) < 5 or version[3] != 'final' or version[4] < 2))):
-    from django.core.exceptions import ImproperlyConfigured
-    raise ImproperlyConfigured("MySQLdb-1.2.1p2 or newer is required; you have %s" % Database.__version__)
-
-from MySQLdb.converters import conversions, Thing2Literal
-from MySQLdb.constants import FIELD_TYPE, CLIENT
 
 try:
     import pytz
@@ -55,7 +42,7 @@ DatabaseError = Database.DatabaseError
 IntegrityError = Database.IntegrityError
 
 # It's impossible to import datetime_or_None directly from MySQLdb.times
-parse_datetime = conversions[FIELD_TYPE.DATETIME]
+parse_datetime = decoders[FIELD_TYPE.DATETIME]
 
 def parse_datetime_with_timezone_support(value):
     dt = parse_datetime(value)
@@ -76,21 +63,13 @@ def adapt_datetime_with_timezone_support(value, conv):
         value = value.astimezone(timezone.utc).replace(tzinfo=None)
     return Thing2Literal(value.strftime("%Y-%m-%d %H:%M:%S"), conv)
 
-# MySQLdb-1.2.1 returns TIME columns as timedelta -- they are more like
-# timedelta in terms of actual behavior as they are signed and include days --
-# and Django expects time, so we still need to override that. We also need to
-# add special handling for SafeText and SafeBytes as MySQLdb's type
-# checking is too tight to catch those (see Django ticket #6052).
-# Finally, MySQLdb always returns naive datetime objects. However, when
-# timezone support is active, Django expects timezone-aware datetime objects.
-django_conversions = conversions.copy()
-django_conversions.update({
+django_conversions = {
     FIELD_TYPE.TIME: util.typecast_time,
     FIELD_TYPE.DECIMAL: util.typecast_decimal,
     FIELD_TYPE.NEWDECIMAL: util.typecast_decimal,
     FIELD_TYPE.DATETIME: parse_datetime_with_timezone_support,
     datetime.datetime: adapt_datetime_with_timezone_support,
-})
+}
 
 # This should match the numerical portion of the version numbers (we can treat
 # versions like 5.0.24 and 5.0.24a as the same). Based on the list of version
