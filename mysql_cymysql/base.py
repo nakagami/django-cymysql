@@ -72,6 +72,9 @@ def adapt_datetime_with_timezone_support(value,  charset=None, field=None, use_u
 # timezone support is active, Django expects timezone-aware datetime objects.
 django_conversions = decoders.copy()
 django_conversions.update({
+    FIELD_TYPE.TIME: util.typecast_time,
+#    FIELD_TYPE.DECIMAL: util.typecast_decimal,
+#    FIELD_TYPE.NEWDECIMAL: util.typecast_decimal,
     FIELD_TYPE.DATETIME: parse_datetime_with_timezone_support,
     datetime.datetime: adapt_datetime_with_timezone_support,
 })
