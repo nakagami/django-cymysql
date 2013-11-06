@@ -14,7 +14,7 @@ classifiers = [
     'Topic :: Database',
 ]
 
-setup(name='mysql_cymysql', 
+setup(name='django-cymysql', 
         version='0.1.0',
         description = __doc__, 
         url='https://github.com/nakagami/django-cymysql/',
