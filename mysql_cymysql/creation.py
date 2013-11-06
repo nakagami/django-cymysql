@@ -33,8 +33,7 @@ class DatabaseCreation(BaseDatabaseCreation):
 
     def sql_table_creation_suffix(self):
         suffix = []
-        if self.connection.settings_dict['TEST_CHARSET']:
-            suffix.append('CHARACTER SET %s' % self.connection.settings_dict['TEST_CHARSET'])
+        suffix.append('CHARACTER SET UTF8')
         if self.connection.settings_dict['TEST_COLLATION']:
             suffix.append('COLLATE %s' % self.connection.settings_dict['TEST_COLLATION'])
         return ' '.join(suffix)
@@ -60,7 +59,7 @@ class DatabaseCreation(BaseDatabaseCreation):
 
         index_name = "%s_%s" % (model._meta.db_table, self._digest([f.name for f in fields]))
 
-        from ..util import truncate_name
+        from django.db.backends.util import truncate_name
 
         return [
             style.SQL_KEYWORD("DROP INDEX") + " " +
