@@ -1,21 +1,20 @@
 django-cymysql
 ==============
 
-django mysql database backend with cymysql
+Django mysql database backend for cymysql
 
 ------------
 
-* Django 1.6
-* CyMySQL (https://github.com/nakagami/CyMySQL) 0.7.x
+* Django 1.6.0 or higher.
+* CyMySQL (https://github.com/nakagami/CyMySQL) 0.7.1 or higher.
 
 Installation
 ------------
 
 ::
 
-    $ git clone https://github.com/nakagami/django-cymysql
-    $ cd django-cymysql
-    $ python setup.py install
+    $ pip install cymysql
+    $ pip install django-cymysql
 
 Database
 ------------
@@ -40,5 +39,4 @@ Settings
             'PASSWORD': ...,
         }
     }
-
 
