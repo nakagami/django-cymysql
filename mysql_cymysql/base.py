@@ -57,7 +57,7 @@ def adapt_datetime_with_timezone_support(value,  charset=None, field=None, use_u
             default_timezone = timezone.get_default_timezone()
             value = timezone.make_aware(value, default_timezone)
         value = value.astimezone(timezone.utc).replace(tzinfo=None)
-    return = escape_string(value.strftime("%Y-%m-%d %H:%M:%S"))
+    return escape_string(value.strftime("%Y-%m-%d %H:%M:%S"))
 
 # MySQLdb-1.2.1 returns TIME columns as timedelta -- they are more like
 # timedelta in terms of actual behavior as they are signed and include days --
