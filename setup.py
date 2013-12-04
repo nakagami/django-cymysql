@@ -5,7 +5,7 @@ Django database backend for cymysql
 from distutils.core import setup, Command
 
 classifiers = [
-    'Development Status :: 3 - Alpha',
+    'Development Status :: 4 - Beta'
     'License :: OSI Approved :: BSD License',
     'Operating System :: OS Independent',
     'Programming Language :: Python',
