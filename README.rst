@@ -40,3 +40,8 @@ Settings
         }
     }
 
+If you want to use south::
+
+   SOUTH_DATABASE_ADAPTERS = {
+       'default': "south.db.mysql"
+   }
