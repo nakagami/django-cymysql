@@ -1,0 +1,17 @@
+language: python
+python:
+  - "2.7"
+
+install:
+  - git clone https://github.com/django/django.git
+  - pip install cython
+  - pip install cymysql
+  - python setup.py install
+  - cp test_cymysql.py django/tests
+
+before_script:
+  - mysql -e 'create database test_cymysql DEFAULT CHARACTER SET utf8 DEFAULT COLLATE utf8_general_ci;'
+  - mysql -e 'create database test_cymysql2 DEFAULT CHARACTER SET utf8 DEFAULT COLLATE utf8_general_ci;'
+
+script:
+  - PYTHONPATH='django' python django/tests/runtests.py --settings=test_cymysql
