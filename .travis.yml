@@ -3,11 +3,13 @@ python:
   - "2.7"
 
 install:
-  - git clone https://github.com/django/django.git /tmp/django
   - pip install cython
   - pip install cymysql
   - python setup.py install
+  - git clone https://github.com/django/django.git /tmp/django
   - cp test_cymysql.py /tmp/django/tests
+  - cd /tmp/django
+  - git checkout 1.6
 
 before_script:
   - mysql -e 'create database test_cymysql DEFAULT CHARACTER SET utf8 DEFAULT COLLATE utf8_general_ci;'
