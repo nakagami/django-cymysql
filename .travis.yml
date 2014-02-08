@@ -9,7 +9,6 @@ install:
   - python setup.py install
   - git clone https://github.com/django/django.git /tmp/django
   - cp test_cymysql.py /tmp/django/tests
-  - cd /tmp/django
 
 before_script:
   - mysql -e 'create database test_cymysql DEFAULT CHARACTER SET utf8 DEFAULT COLLATE utf8_general_ci;'
