@@ -30,7 +30,6 @@ from mysql_cymysql.creation import DatabaseCreation
 from mysql_cymysql.introspection import DatabaseIntrospection
 from mysql_cymysql.validation import DatabaseValidation
 from django.utils.encoding import force_str, force_text
-from django.db.backends.mysql.schema import DatabaseSchemaEditor
 from django.utils.safestring import SafeBytes, SafeText
 from django.utils import six
 from django.utils import timezone
@@ -506,6 +505,7 @@ class DatabaseWrapper(BaseDatabaseWrapper):
 
     def schema_editor(self, *args, **kwargs):
         "Returns a new instance of this backend's SchemaEditor"
+        from django.db.backends.mysql.schema import DatabaseSchemaEditor
         return DatabaseSchemaEditor(self, *args, **kwargs)
 
     def is_usable(self):
