@@ -1,6 +1,5 @@
 import re
 from .base import FIELD_TYPE
-from django.utils.datastructures import OrderedSet
 from django.db.backends import BaseDatabaseIntrospection, FieldInfo
 from django.utils.encoding import force_text
 
@@ -128,6 +127,7 @@ class DatabaseIntrospection(BaseDatabaseIntrospection):
         """
         Retrieves any constraints or keys (unique, pk, fk, check, index) across one or more columns.
         """
+        from django.utils.datastructures import OrderedSet
         constraints = {}
         # Get the actual constraint names and columns
         name_query = """
