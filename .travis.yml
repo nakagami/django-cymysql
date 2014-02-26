@@ -6,7 +6,7 @@ install:
   - pip install cython
   - pip install cymysql
   - python setup.py install
-  - (cd /tmp; wget https://pypi.python.org/packages/source/D/Django/Django-1.6.2.tar.gz)
+  - (cd /tmp; wget https://pypi.python.org/packages/source/D/Django/Django-1.6.2.tar.gz; tar zxvf Django-1.6.2.tar.gz)
   - cp test_cymysql.py /tmp/Django-1.6.2/tests
 
 before_script:
