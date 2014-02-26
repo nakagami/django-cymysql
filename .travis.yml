@@ -6,13 +6,12 @@ install:
   - pip install cython
   - pip install cymysql
   - python setup.py install
-  - git clone https://github.com/django/django.git /tmp/django
-  - cp test_cymysql.py /tmp/django/tests
+  - (cd /tmp; wget https://pypi.python.org/packages/source/D/Django/Django-1.6.2.tar.gz)
+  - cp test_cymysql.py /tmp/Django-1.6.2/tests
 
 before_script:
   - mysql -e 'create database test_cymysql DEFAULT CHARACTER SET utf8 DEFAULT COLLATE utf8_general_ci;'
   - mysql -e 'create database test_cymysql2 DEFAULT CHARACTER SET utf8 DEFAULT COLLATE utf8_general_ci;'
 
 script:
-  - (cd /tmp/django; git checkout 1.6)
-  - PYTHONPATH='/tmp/django' python /tmp/django/tests/runtests.py --settings=test_cymysql
+  - PYTHONPATH='/tmp/Django-1.6.2' python /tmp/Django-1.6.2/tests/runtests.py --settings=test_cymysql
