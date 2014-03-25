@@ -69,7 +69,7 @@ class DatabaseCreation(BaseDatabaseCreation):
 
         index_name = "%s_%s" % (model._meta.db_table, self._digest([f.name for f in fields]))
 
-        from django.db.backends.utils import truncate_name
+        from django.db.backends.util import truncate_name
 
         return [
             style.SQL_KEYWORD("DROP INDEX") + " " +
