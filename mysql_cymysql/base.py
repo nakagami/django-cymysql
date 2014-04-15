@@ -24,7 +24,8 @@ except ImportError:
 
 from django.conf import settings
 from django.db import utils
-from django.db.backends import *
+from django.db.backends import (utils as backend_utils, BaseDatabaseFeatures,
+    BaseDatabaseOperations, BaseDatabaseWrapper)
 from mysql_cymysql.client import DatabaseClient
 from mysql_cymysql.creation import DatabaseCreation
 from mysql_cymysql.introspection import DatabaseIntrospection
@@ -69,12 +70,10 @@ def adapt_datetime_with_timezone_support(value,  charset=None, field=None, use_u
 def typecast_time(v):
     if isinstance(v, bytes):
         v = v.decode('ascii')
-    return utils.typecast_time(v)
+    return backend_utils.typecast_time(v)
 django_conversions = decoders.copy()
 django_conversions.update({
     FIELD_TYPE.TIME: typecast_time,
-#    FIELD_TYPE.DECIMAL: util.typecast_decimal,
-#    FIELD_TYPE.NEWDECIMAL: util.typecast_decimal,
     FIELD_TYPE.DATETIME: parse_datetime_with_timezone_support,
     datetime.datetime: adapt_datetime_with_timezone_support,
 })
