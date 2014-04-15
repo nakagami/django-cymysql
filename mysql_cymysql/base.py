@@ -23,10 +23,7 @@ except ImportError:
     pytz = None
 
 from django.conf import settings
-try:
-    from django.db import utils
-except ImportError:
-    from django.db import util as utils     # 1.6
+from django.db import utils
 from django.db.backends import *
 from mysql_cymysql.client import DatabaseClient
 from mysql_cymysql.creation import DatabaseCreation
