@@ -5,7 +5,7 @@ python:
 
 install:
   - pip install cython
-  - pip install cymysql
+  - pip install git+https://github.com/nakagami/cymysql.git
   - python setup.py install
   - (cd /tmp; wget https://pypi.python.org/packages/source/D/Django/Django-1.6.6.tar.gz; tar zxf Django-1.6.6.tar.gz)
   - (cd /tmp; wget https://pypi.python.org/packages/source/D/Django/Django-1.7.tar.gz; tar zxf Django-1.7.tar.gz)
