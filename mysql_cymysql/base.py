@@ -514,6 +514,8 @@ class DatabaseWrapper(BaseDatabaseWrapper):
         return DatabaseSchemaEditor(self, *args, **kwargs)
 
     def is_usable(self):
+        if not self.connection._is_connect():
+            return False
         try:
             self.connection.ping()
         except DatabaseError:
