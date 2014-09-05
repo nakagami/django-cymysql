@@ -32,10 +32,10 @@ from django.db.backends import (
     BaseDatabaseFeatures,
     BaseDatabaseOperations,
     BaseDatabaseWrapper)
-from django.db.backends.mysql.client import DatabaseClient
-from django.db.backends.mysql.creation import DatabaseCreation
-from django.db.backends.mysql.introspection import DatabaseIntrospection
-from django.db.backends.mysql.validation import DatabaseValidation
+from mysql_cymysql.client import DatabaseClient
+from mysql_cymysql.creation import DatabaseCreation
+from mysql_cymysql.introspection import DatabaseIntrospection
+from mysql_cymysql.validation import DatabaseValidation
 from django.utils.encoding import force_str, force_text
 from django.utils.safestring import SafeBytes, SafeText
 from django.utils import six
