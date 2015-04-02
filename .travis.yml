@@ -23,4 +23,4 @@ before_script:
 script:
   - (cd /tmp/Django-1.6.11/tests; PYTHONPATH='..' python runtests.py --settings=test_cymysql)
   - (cd /tmp/Django-1.7.7/tests; PYTHONPATH='..' python runtests.py --settings=test_cymysql)
-  - (cd /tmp/Django-1.8/tests; PYTHONPATH='..' python runtests.py --settings=test_cymysql)
+#  - (cd /tmp/Django-1.8/tests; PYTHONPATH='..' python runtests.py --settings=test_cymysql)
