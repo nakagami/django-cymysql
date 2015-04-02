@@ -8,7 +8,10 @@ from __future__ import unicode_literals
 import uuid
 
 from django.conf import settings
-from django.db.backends import BaseDatabaseOperations
+try:
+    from django.db.backends import BaseDatabaseOperations
+except ImportError: # 1.8
+    from django.db.backends.base.operations import BaseDatabaseOperations
 from django.utils import six, timezone
 from django.utils.encoding import force_text
 
