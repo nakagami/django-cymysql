@@ -6,6 +6,8 @@ Requires CyMySQL: https://github.com/nakagami/CyMySQL
 from __future__ import unicode_literals
 
 import uuid
+
+from django.conf import settings
 from django.db.backends import BaseDatabaseOperations
 from django.utils import six, timezone
 from django.utils.encoding import force_text
