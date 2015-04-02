@@ -1,5 +1,7 @@
-from django.db.backends.creation import BaseDatabaseCreation
-
+try:
+    from django.db.backends.creation import BaseDatabaseCreation
+except ImportError: # 1.8
+    from django.db.backends.base.creation import BaseDatabaseCreation
 
 class DatabaseCreation(BaseDatabaseCreation):
     # This dictionary maps Field objects to their associated MySQL column
