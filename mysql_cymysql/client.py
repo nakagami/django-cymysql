@@ -1,7 +1,10 @@
 import os
 import sys
 
-from django.db.backends import BaseDatabaseClient
+try:
+    from django.db.backends import BaseDatabaseClient
+except ImportError: # 1.8
+    from django.db.backends.base.client import BaseDatabaseClient
 
 class DatabaseClient(BaseDatabaseClient):
     executable_name = 'mysql'
