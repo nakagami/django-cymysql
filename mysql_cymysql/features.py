@@ -10,6 +10,7 @@ try:
 except ImportError: # 1.8
     from django.db.backends.base.features import BaseDatabaseFeatures
 from django.utils.functional import cached_property
+from django.utils import six
 
 from mysql_cymysql.base import Database
 
