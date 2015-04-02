@@ -5,7 +5,10 @@ Requires CyMySQL: https://github.com/nakagami/CyMySQL
 """
 from __future__ import unicode_literals
 
-from django.db.backends.base.features import BaseDatabaseFeatures
+try:
+    from django.db.backends import BaseDatabaseFeatures
+except ImportError: # 1.8
+    from django.db.backends.base.features import BaseDatabaseFeatures
 from django.utils.functional import cached_property
 
 from mysql_cymysql.base import Database
