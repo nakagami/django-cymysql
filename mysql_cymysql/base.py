@@ -30,6 +30,7 @@ except ImportError: # 1.6
     from django.db.backends import util as backend_utils
 from django.db.backends import (
     BaseDatabaseFeatures,
+    BaseDatabaseOperations,
     BaseDatabaseWrapper)
 from mysql_cymysql.client import DatabaseClient
 from mysql_cymysql.creation import DatabaseCreation
