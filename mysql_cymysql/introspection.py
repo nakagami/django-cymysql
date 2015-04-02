@@ -1,6 +1,12 @@
 import re
 from .base import FIELD_TYPE
-from django.db.backends import BaseDatabaseIntrospection, FieldInfo
+try:
+    from django.db.backends import BaseDatabaseIntrospection, FieldInfo
+except ImportError: # 1.8
+    from django.db.backends.base.introspection import (
+        BaseDatabaseIntrospection, FieldInfo, TableInfo,
+    )
+
 from django.utils.encoding import force_text
 
 
