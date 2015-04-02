@@ -28,11 +28,10 @@ try:
     from django.db.backends import utils as backend_utils
 except ImportError: # 1.6
     from django.db.backends import util as backend_utils
-#from django.db.backends import (
-#    BaseDatabaseFeatures,
-#    BaseDatabaseOperations,
-#    BaseDatabaseWrapper)
-from django.db.backends import BaseDatabaseWrapper
+try:
+    from django.db.backends import BaseDatabaseWrapper
+except ImportError: # 1.8
+    from django.db.backends.base.base import BaseDatabaseWrapper
 from mysql_cymysql.client import DatabaseClient
 from mysql_cymysql.creation import DatabaseCreation
 from mysql_cymysql.introspection import DatabaseIntrospection
