@@ -36,6 +36,7 @@ from mysql_cymysql.client import DatabaseClient
 from mysql_cymysql.creation import DatabaseCreation
 from mysql_cymysql.introspection import DatabaseIntrospection
 from mysql_cymysql.validation import DatabaseValidation
+from mysql_cymysql.operations import DatabaseOperatons
 from django.utils.encoding import force_str, force_text
 from django.utils.safestring import SafeBytes, SafeText
 from django.utils import six
