@@ -33,7 +33,6 @@ class DatabaseFeatures(BaseDatabaseFeatures):
     supports_long_model_names = False
     # XXX MySQL DB-API drivers currently fail on binary data on Python 3.
     supports_binary_field = six.PY2
-    supports_microsecond_precision = False
     supports_regex_backreferencing = False
     supports_date_lookup_using_string = False
     can_introspect_binary_field = False
@@ -67,6 +66,10 @@ class DatabaseFeatures(BaseDatabaseFeatures):
     def can_introspect_foreign_keys(self):
         "Confirm support for introspected foreign keys"
         return self._mysql_storage_engine != 'MyISAM'
+
+    @cached_property
+    def supports_microsecond_precision(self):
+        return self.connection.mysql_version >= (5, 6, 4)
 
     @cached_property
     def has_zoneinfo_database(self):
