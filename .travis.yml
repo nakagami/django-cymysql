@@ -8,8 +8,7 @@ python:
 install:
 #  - pip install cython
   - pip uninstall -y numpy
-#  - pip install git+https://github.com/nakagami/cymysql.git
-  - pip install cymysql
+  - pip install git+https://github.com/nakagami/cymysql.git
   - python setup.py install
   - (cd /tmp; wget https://pypi.python.org/packages/source/D/Django/Django-1.6.11.tar.gz; tar zxf Django-1.6.11.tar.gz)
   - (cd /tmp; wget https://pypi.python.org/packages/source/D/Django/Django-1.7.7.tar.gz; tar zxf Django-1.7.7.tar.gz)
@@ -24,5 +23,5 @@ before_script:
 
 script:
   - (cd /tmp/Django-1.6.11/tests; PYTHONPATH='..' python runtests.py --settings=test_cymysql)
-#  - (cd /tmp/Django-1.7.7/tests; PYTHONPATH='..' python runtests.py --settings=test_cymysql)
+  - (cd /tmp/Django-1.7.7/tests; PYTHONPATH='..' python runtests.py --settings=test_cymysql)
   - (cd /tmp/Django-1.8/tests; PYTHONPATH='..' python runtests.py --settings=test_cymysql)
