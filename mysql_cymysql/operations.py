@@ -80,9 +80,16 @@ class DatabaseOperations(BaseDatabaseOperations):
             sql = "CAST(DATE_FORMAT(%s, '%s') AS DATETIME)" % (field_name, format_str)
         return sql, params
 
-    def date_interval_sql(self, sql, connector, timedelta):
-        return "(%s %s INTERVAL '%d 0:0:%d:%d' DAY_MICROSECOND)" % (sql, connector,
+    def date_interval_sql(self, *args):
+        if len(args) == 3:
+            sql, connector, timedelta = args[0], args[1], args[2]
+            return "(%s %s INTERVAL '%d 0:0:%d:%d' DAY_MICROSECOND)" % (
+                sql, connector,
                 timedelta.days, timedelta.seconds, timedelta.microseconds)
+        else:   # 1.8
+            timedelta = args[0]
+            return "INTERVAL '%d 0:0:%d:%d' DAY_MICROSECOND" % (
+                timedelta.days, timedelta.seconds, timedelta.microseconds), []
 
     def drop_foreignkey_sql(self):
         return "DROP FOREIGN KEY"
