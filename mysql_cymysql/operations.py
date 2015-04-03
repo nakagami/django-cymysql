@@ -91,8 +91,8 @@ class DatabaseOperations(BaseDatabaseOperations):
             return "INTERVAL '%d 0:0:%d:%d' DAY_MICROSECOND" % (
                 timedelta.days, timedelta.seconds, timedelta.microseconds), []
 
-    def drop_foreignkey_sql(self):
-        return "DROP FOREIGN KEY"
+    def format_for_duration_arithmetic(self, sql):
+        return 'INTERVAL %s MICROSECOND' % sql
 
     def drop_foreignkey_sql(self):
         return "DROP FOREIGN KEY"
