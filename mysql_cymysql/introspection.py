@@ -2,6 +2,7 @@ import re
 from .base import FIELD_TYPE
 try:
     from django.db.backends import BaseDatabaseIntrospection, FieldInfo
+    TableInfo = None
 except ImportError: # 1.8
     from django.db.backends.base.introspection import (
         BaseDatabaseIntrospection, FieldInfo, TableInfo,
@@ -39,8 +40,13 @@ class DatabaseIntrospection(BaseDatabaseIntrospection):
 
     def get_table_list(self, cursor):
         "Returns a list of table names in the current database."
-        cursor.execute("SHOW TABLES")
-        return [row[0] for row in cursor.fetchall()]
+        if TableInfo:   # 1.8
+            cursor.execute("SHOW FULL TABLES")
+            return [TableInfo(row[0], {'BASE TABLE': 't', 'VIEW': 'v'}.get(row[1]))
+                    for row in cursor.fetchall()]
+        else:
+            cursor.execute("SHOW TABLES")
+            return [row[0] for row in cursor.fetchall()]
 
     def get_table_description(self, cursor, table_name):
         """
@@ -128,6 +134,20 @@ class DatabaseIntrospection(BaseDatabaseIntrospection):
             if not row[1]:
                 indexes[row[4]]['unique'] = True
         return indexes
+
+    def get_storage_engine(self, cursor, table_name):
+        """
+        Retrieves the storage engine for a given table. Returns the default
+        storage engine if the table doesn't exist.
+        """
+        cursor.execute(
+            "SELECT engine "
+            "FROM information_schema.tables "
+            "WHERE table_name = %s", [table_name])
+        result = cursor.fetchone()
+        if not result:
+            return self.connection.features._mysql_storage_engine
+        return result[0]
 
     def get_constraints(self, cursor, table_name):
         """
