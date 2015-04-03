@@ -1,4 +1,6 @@
 import re
+from collections import namedtuple
+
 from .base import FIELD_TYPE
 try:
     from django.db.backends import BaseDatabaseIntrospection, FieldInfo
@@ -7,6 +9,7 @@ except ImportError: # 1.8
     from django.db.backends.base.introspection import (
         BaseDatabaseIntrospection, FieldInfo, TableInfo,
     )
+    FieldInfo = namedtuple('FieldInfo', FieldInfo._fields + ('extra',))
 
 from django.utils.encoding import force_text
 
@@ -58,28 +61,57 @@ class DatabaseIntrospection(BaseDatabaseIntrospection):
         """
         Returns a description of the table, with the DB-API cursor.description interface."
         """
-        # varchar length returned by cursor.description is an internal length,
-        # not visible length (#5725), use information_schema database to fix this
-        cursor.execute("""
-            SELECT column_name, character_maximum_length FROM information_schema.columns
-            WHERE table_name = %s AND table_schema = DATABASE()
-                AND character_maximum_length IS NOT NULL""", [table_name])
-        length_map = dict(cursor.fetchall())
+        if TableInfo:   # 1.8
+            # information_schema database gives more accurate results for some figures:
+            # - varchar length returned by cursor.description is an internal length,
+            #   not visible length (#5725)
+            # - precision and scale (for decimal fields) (#5014)
+            # - auto_increment is not available in cursor.description
+            InfoLine = namedtuple('InfoLine', 'col_name data_type max_len num_prec num_scale extra')
+            cursor.execute("""
+                SELECT column_name, data_type, character_maximum_length, numeric_precision, numeric_scale, extra
+                FROM information_schema.columns
+                WHERE table_name = %s AND table_schema = DATABASE()""", [table_name])
+            field_info = {line[0]: InfoLine(*line) for line in cursor.fetchall()}
 
-        # Also getting precision and scale from information_schema (see #5014)
-        cursor.execute("""
-            SELECT column_name, numeric_precision, numeric_scale FROM information_schema.columns
-            WHERE table_name = %s AND table_schema = DATABASE()
-                AND data_type='decimal'""", [table_name])
-        numeric_map = dict((line[0], tuple(int(n) for n in line[1:])) for line in cursor.fetchall())
+            cursor.execute("SELECT * FROM %s LIMIT 1" % self.connection.ops.quote_name(table_name))
+            to_int = lambda i: int(i) if i is not None else i
+            fields = []
+            for line in cursor.description:
+                col_name = force_text(line[0])
+                fields.append(
+                    FieldInfo(*((col_name,)
+                                + line[1:3]
+                                + (to_int(field_info[col_name].max_len) or line[3],
+                                   to_int(field_info[col_name].num_prec) or line[4],
+                                   to_int(field_info[col_name].num_scale) or line[5])
+                                + (line[6],)
+                                + (field_info[col_name].extra,)))
+                )
+            return fields
+        else:
+            # varchar length returned by cursor.description is an internal length,
+            # not visible length (#5725), use information_schema database to fix this
+            cursor.execute("""
+                SELECT column_name, character_maximum_length FROM information_schema.columns
+                WHERE table_name = %s AND table_schema = DATABASE()
+                    AND character_maximum_length IS NOT NULL""", [table_name])
+            length_map = dict(cursor.fetchall())
 
-        cursor.execute("SELECT * FROM %s LIMIT 1" % self.connection.ops.quote_name(table_name))
-        return [FieldInfo(*((force_text(line[0]),)
-                            + line[1:3]
-                            + (length_map.get(line[0], line[3]),)
-                            + numeric_map.get(line[0], line[4:6])
-                            + (line[6],)))
-            for line in cursor.description]
+            # Also getting precision and scale from information_schema (see #5014)
+            cursor.execute("""
+                SELECT column_name, numeric_precision, numeric_scale FROM information_schema.columns
+                WHERE table_name = %s AND table_schema = DATABASE()
+                    AND data_type='decimal'""", [table_name])
+            numeric_map = dict((line[0], tuple(int(n) for n in line[1:])) for line in cursor.fetchall())
+
+            cursor.execute("SELECT * FROM %s LIMIT 1" % self.connection.ops.quote_name(table_name))
+            return [FieldInfo(*((force_text(line[0]),)
+                                + line[1:3]
+                                + (length_map.get(line[0], line[3]),)
+                                + numeric_map.get(line[0], line[4:6])
+                                + (line[6],)))
+                for line in cursor.description]
 
     def _name_to_index(self, cursor, table_name):
         """
