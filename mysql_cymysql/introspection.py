@@ -38,6 +38,12 @@ class DatabaseIntrospection(BaseDatabaseIntrospection):
         FIELD_TYPE.VAR_STRING: 'CharField',
     }
 
+    def get_field_type(self, data_type, description):
+        field_type = super(DatabaseIntrospection, self).get_field_type(data_type, description)
+        if field_type == 'IntegerField' and 'auto_increment' in description.extra:
+            return 'AutoField'
+        return field_type
+
     def get_table_list(self, cursor):
         "Returns a list of table names in the current database."
         if TableInfo:   # 1.8
