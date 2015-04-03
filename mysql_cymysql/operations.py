@@ -140,22 +140,6 @@ class DatabaseOperations(BaseDatabaseOperations):
         else:
             return []
 
-    def sequence_reset_by_name_sql(self, style, sequences):
-        # Truncate already resets the AUTO_INCREMENT field from
-        # MySQL version 5.0.13 onwards. Refs #16961.
-        if self.connection.mysql_version < (5, 0, 13):
-            return [
-                "%s %s %s %s %s;" % (
-                    style.SQL_KEYWORD('ALTER'),
-                    style.SQL_KEYWORD('TABLE'),
-                    style.SQL_TABLE(self.quote_name(sequence['table'])),
-                    style.SQL_KEYWORD('AUTO_INCREMENT'),
-                    style.SQL_FIELD('= 1'),
-                ) for sequence in sequences
-            ]
-        else:
-            return []
-
     def validate_autopk_value(self, value):
         # MySQLism: zero in AUTO_INCREMENT field does not work. Refs #17653.
         if value == 0:
@@ -207,4 +191,30 @@ class DatabaseOperations(BaseDatabaseOperations):
         if connector == '^':
             return 'POW(%s)' % ','.join(sub_expressions)
         return super(DatabaseOperations, self).combine_expression(connector, sub_expressions)
+
+    def get_db_converters(self, expression):
+        converters = super(DatabaseOperations, self).get_db_converters(expression)
+        internal_type = expression.output_field.get_internal_type()
+        if internal_type in ['BooleanField', 'NullBooleanField']:
+            converters.append(self.convert_booleanfield_value)
+        if internal_type == 'UUIDField':
+            converters.append(self.convert_uuidfield_value)
+        if internal_type == 'TextField':
+            converters.append(self.convert_textfield_value)
+        return converters
+
+    def convert_booleanfield_value(self, value, expression, connection, context):
+        if value in (0, 1):
+            value = bool(value)
+        return value
+
+    def convert_uuidfield_value(self, value, expression, connection, context):
+        if value is not None:
+            value = uuid.UUID(value)
+        return value
+
+    def convert_textfield_value(self, value, expression, connection, context):
+        if value is not None:
+            value = force_text(value)
+        return value
 
