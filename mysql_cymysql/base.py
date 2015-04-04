@@ -37,7 +37,10 @@ from mysql_cymysql.creation import DatabaseCreation
 from mysql_cymysql.features import DatabaseFeatures
 from mysql_cymysql.introspection import DatabaseIntrospection
 from mysql_cymysql.operations import DatabaseOperations
-from django.db.backends.mysql.schema import DatabaseSchemaEditor
+try:
+    from django.db.backends.mysql.schema import DatabaseSchemaEditor
+except ImportError: # 1.6
+    DatabaseSchemaEditor = None
 from mysql_cymysql.validation import DatabaseValidation
 from django.utils.encoding import force_str, force_text
 from django.utils.safestring import SafeBytes, SafeText
