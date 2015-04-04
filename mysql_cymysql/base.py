@@ -34,10 +34,11 @@ except ImportError: # 1.8
     from django.db.backends.base.base import BaseDatabaseWrapper
 from mysql_cymysql.client import DatabaseClient
 from mysql_cymysql.creation import DatabaseCreation
-from mysql_cymysql.introspection import DatabaseIntrospection
-from mysql_cymysql.validation import DatabaseValidation
-from mysql_cymysql.operations import DatabaseOperations
 from mysql_cymysql.features import DatabaseFeatures
+from mysql_cymysql.introspection import DatabaseIntrospection
+from mysql_cymysql.operations import DatabaseOperations
+from django.db.backends.mysql.schema import DatabaseSchemaEditor
+from mysql_cymysql.validation import DatabaseValidation
 from django.utils.encoding import force_str, force_text
 from django.utils.safestring import SafeBytes, SafeText
 from django.utils import six
@@ -220,6 +221,7 @@ class DatabaseWrapper(BaseDatabaseWrapper):
     }
 
     Database = Database
+    SchemaEditorClass = DatabaseSchemaEditor
 
     def __init__(self, *args, **kwargs):
         super(DatabaseWrapper, self).__init__(*args, **kwargs)
@@ -284,7 +286,8 @@ class DatabaseWrapper(BaseDatabaseWrapper):
             pass
 
     def _set_autocommit(self, autocommit):
-        self.connection.autocommit(autocommit)
+        with self.wrap_database_errors:
+            self.connection.autocommit(autocommit)
 
     def disable_constraint_checking(self):
         """

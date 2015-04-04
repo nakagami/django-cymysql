@@ -5,6 +5,7 @@ Requires CyMySQL: https://github.com/nakagami/CyMySQL
 """
 from __future__ import unicode_literals
 
+import django
 try:
     from django.db.backends import BaseDatabaseFeatures
 except ImportError: # 1.8
@@ -31,17 +32,19 @@ class DatabaseFeatures(BaseDatabaseFeatures):
     has_select_for_update_nowait = False
     supports_forward_references = False
     supports_long_model_names = False
-    # XXX MySQL DB-API drivers currently fail on binary data on Python 3.
-    supports_binary_field = six.PY2
+    supports_binary_field = True
     supports_regex_backreferencing = False
     supports_date_lookup_using_string = False
+    can_introspect_autofield = django.VERSION[1] > 7
     can_introspect_binary_field = False
     can_introspect_boolean_field = False
+    can_introspect_small_integer_field = django.VERSION[1] > 7
     supports_timezones = False
     requires_explicit_null_ordering_when_grouping = True
     allows_auto_pk_0 = False
     allows_primary_key_0 = False
     uses_savepoints = True
+    can_release_savepoints = True
     atomic_transactions = False
     supports_column_check_constraints = False
 

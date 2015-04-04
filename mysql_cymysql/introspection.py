@@ -1,7 +1,7 @@
 import re
 from collections import namedtuple
 
-from .base import FIELD_TYPE
+from cymysql.constants import FIELD_TYPE
 try:
     from django.db.backends import BaseDatabaseIntrospection, FieldInfo
     TableInfo = None
