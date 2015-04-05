@@ -40,7 +40,7 @@ Settings
         }
     }
 
-If you want to use south::
+If you want to use south (Probably Django 1.6)::
 
    SOUTH_DATABASE_ADAPTERS = {
        'default': "south.db.mysql"
