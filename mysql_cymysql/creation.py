@@ -6,12 +6,6 @@ from django.utils.functional import cached_property
 
 class DatabaseCreation(BaseDatabaseCreation):
 
-    @cached_property
-    def data_types(self):
-        # fallback propery for 1.6 and 1.7
-        from mysql_cymysql.base import DatabaseWrapper
-        return DatabaseWrapper._data_types
-
     def sql_table_creation_suffix(self):
         suffix = []
         if self.connection.settings_dict.get('TEST_CHARSET'):

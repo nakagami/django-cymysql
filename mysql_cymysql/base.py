@@ -24,23 +24,14 @@ except ImportError:
 
 from django.conf import settings
 from django.db import utils
-try:
-    from django.db.backends import utils as backend_utils
-except ImportError: # 1.6
-    from django.db.backends import util as backend_utils
-try:
-    from django.db.backends import BaseDatabaseWrapper
-except ImportError: # 1.8
-    from django.db.backends.base.base import BaseDatabaseWrapper
+from django.db.backends import utils as backend_utils
+from django.db.backends.base.base import BaseDatabaseWrapper
 from mysql_cymysql.client import DatabaseClient
 from mysql_cymysql.creation import DatabaseCreation
 from mysql_cymysql.features import DatabaseFeatures
 from mysql_cymysql.introspection import DatabaseIntrospection
 from mysql_cymysql.operations import DatabaseOperations
-try:
-    from django.db.backends.mysql.schema import DatabaseSchemaEditor
-except ImportError: # 1.6
-    DatabaseSchemaEditor = None
+from django.db.backends.mysql.schema import DatabaseSchemaEditor
 from mysql_cymysql.validation import DatabaseValidation
 from django.utils.encoding import force_str, force_text
 from django.utils.safestring import SafeBytes, SafeText
@@ -346,11 +337,6 @@ class DatabaseWrapper(BaseDatabaseWrapper):
                         % (table_name, bad_row[0],
                         table_name, column_name, bad_row[1],
                         referenced_table_name, referenced_column_name))
-
-    def schema_editor(self, *args, **kwargs):
-        "Returns a new instance of this backend's SchemaEditor"
-        from django.db.backends.mysql.schema import DatabaseSchemaEditor
-        return DatabaseSchemaEditor(self, *args, **kwargs)
 
     def is_usable(self):
         if not self.connection._is_connect():
