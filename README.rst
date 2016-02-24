@@ -5,7 +5,7 @@ Django mysql database backend for cymysql
 
 ------------
 
-* Django 1.6 ,1.7 and 1.8
+* Django 1.8, 1.9
 * CyMySQL (https://github.com/nakagami/CyMySQL) 0.8.x+
 
 Installation
@@ -39,9 +39,3 @@ Settings
             'PASSWORD': ...,
         }
     }
-
-If you want to use south (Probably Django 1.6)::
-
-   SOUTH_DATABASE_ADAPTERS = {
-       'default': "south.db.mysql"
-   }
