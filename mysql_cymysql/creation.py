@@ -1,24 +1,14 @@
-try:
-    from django.db.backends.creation import BaseDatabaseCreation
-except ImportError: # 1.8
-    from django.db.backends.base.creation import BaseDatabaseCreation
-from django.utils.functional import cached_property
+from django.db.backends.base.creation import BaseDatabaseCreation
+
 
 class DatabaseCreation(BaseDatabaseCreation):
 
     def sql_table_creation_suffix(self):
         suffix = []
-        if self.connection.settings_dict.get('TEST_CHARSET'):
-             suffix.append('CHARACTER SET %s' % self.connection.settings_dict['TEST_CHARSET'])
-        if self.connection.settings_dict.get('TEST_COLLATION'):
-             suffix.append('COLLATE %s' % self.connection.settings_dict['TEST_COLLATION'])
-
-        test_settings = self.connection.settings_dict.get('TEST')
-
-        # checks for truth of test_settings are for django <=1.7a2 compatibility.
-        if test_settings and test_settings['CHARSET']:
+        test_settings = self.connection.settings_dict['TEST']
+        if test_settings['CHARSET']:
             suffix.append('CHARACTER SET %s' % test_settings['CHARSET'])
-        if test_settings and test_settings['COLLATION']:
+        if test_settings['COLLATION']:
             suffix.append('COLLATE %s' % test_settings['COLLATION'])
         return ' '.join(suffix)
 
@@ -43,7 +33,7 @@ class DatabaseCreation(BaseDatabaseCreation):
 
         index_name = "%s_%s" % (model._meta.db_table, self._digest([f.name for f in fields]))
 
-        from django.db.backends.util import truncate_name
+        from ..utils import truncate_name
 
         return [
             style.SQL_KEYWORD("DROP INDEX") + " " +
