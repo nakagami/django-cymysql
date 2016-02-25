@@ -1,8 +1,5 @@
 from django.core import checks
-try:
-    from django.db.backends import BaseDatabaseValidation
-except ImportError: # 1.8
-    from django.db.backends.base.validation import BaseDatabaseValidation
+from django.db.backends.base.validation import BaseDatabaseValidation
 
 
 class DatabaseValidation(BaseDatabaseValidation):
