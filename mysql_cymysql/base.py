@@ -29,7 +29,7 @@ from django.db.backends.base.base import BaseDatabaseWrapper
 from mysql_cymysql.client import DatabaseClient
 from mysql_cymysql.creation import DatabaseCreation
 from mysql_cymysql.features import DatabaseFeatures
-from django.db.backends.mysql.introspection import DatabaseIntrospection
+from mysql_cymysql.introspection import DatabaseIntrospection
 from django.db.backends.mysql.operations import DatabaseOperations
 from django.db.backends.mysql.schema import DatabaseSchemaEditor
 from django.db.backends.mysql.validation import DatabaseValidation
