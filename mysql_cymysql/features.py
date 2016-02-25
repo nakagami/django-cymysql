@@ -1,19 +1,7 @@
-"""
-MySQL database backend for Django.
-
-Requires CyMySQL: https://github.com/nakagami/CyMySQL
-"""
-from __future__ import unicode_literals
-
-import django
-try:
-    from django.db.backends import BaseDatabaseFeatures
-except ImportError: # 1.8
-    from django.db.backends.base.features import BaseDatabaseFeatures
+from django.db.backends.base.features import BaseDatabaseFeatures
 from django.utils.functional import cached_property
-from django.utils import six
 
-from mysql_cymysql.base import Database
+from .base import Database
 
 try:
     import pytz
@@ -22,7 +10,7 @@ except ImportError:
 
 
 class DatabaseFeatures(BaseDatabaseFeatures):
-    empty_fetchmany_value = []
+    empty_fetchmany_value = ()
     update_can_self_select = False
     allows_group_by_pk = True
     related_fields_match_type = True
@@ -31,39 +19,26 @@ class DatabaseFeatures(BaseDatabaseFeatures):
     has_select_for_update = True
     has_select_for_update_nowait = False
     supports_forward_references = False
-    supports_long_model_names = False
-    supports_binary_field = True
     supports_regex_backreferencing = False
     supports_date_lookup_using_string = False
-    can_introspect_autofield = django.VERSION[1] > 7
+    can_introspect_autofield = True
     can_introspect_binary_field = False
-    can_introspect_boolean_field = False
     can_introspect_small_integer_field = True
     supports_timezones = False
     requires_explicit_null_ordering_when_grouping = True
     allows_auto_pk_0 = False
-    allows_primary_key_0 = False
     uses_savepoints = True
     can_release_savepoints = True
     atomic_transactions = False
     supports_column_check_constraints = False
 
-    def __init__(self, connection):
-        super(DatabaseFeatures, self).__init__(connection)
-
     @cached_property
     def _mysql_storage_engine(self):
         "Internal method used in Django tests. Don't rely on this from your code"
-        cursor = self.connection.cursor()
-        cursor.execute('CREATE TABLE INTROSPECT_TEST (X INT)')
-        # This command is MySQL specific; the second column
-        # will tell you the default table type of the created
-        # table. Since all Django's test tables will have the same
-        # table type, that's enough to evaluate the feature.
-        cursor.execute("SHOW TABLE STATUS WHERE Name='INTROSPECT_TEST'")
-        result = cursor.fetchone()
-        cursor.execute('DROP TABLE INTROSPECT_TEST')
-        return result[1]
+        with self.connection.cursor() as cursor:
+            cursor.execute("SELECT ENGINE FROM INFORMATION_SCHEMA.ENGINES WHERE SUPPORT = 'DEFAULT'")
+            result = cursor.fetchone()
+        return result[0]
 
     @cached_property
     def can_introspect_foreign_keys(self):
@@ -85,10 +60,9 @@ class DatabaseFeatures(BaseDatabaseFeatures):
             return False
 
         # Test if the time zone definitions are installed.
-        cursor = self.connection.cursor()
-        cursor.execute("SELECT 1 FROM mysql.time_zone LIMIT 1")
-        return cursor.fetchone() is not None
+        with self.connection.cursor() as cursor:
+            cursor.execute("SELECT 1 FROM mysql.time_zone LIMIT 1")
+            return cursor.fetchone() is not None
 
     def introspected_boolean_field_type(self, *args, **kwargs):
         return 'IntegerField'
-
