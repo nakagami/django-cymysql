@@ -1,29 +1,21 @@
-"""
-MySQL database backend for Django.
-
-Requires CyMySQL: https://github.com/nakagami/CyMySQL
-"""
 from __future__ import unicode_literals
 
 import uuid
 
 from django.conf import settings
-try:
-    from django.db.backends import BaseDatabaseOperations
-except ImportError: # 1.8
-    from django.db.backends.base.operations import BaseDatabaseOperations
+from django.db.backends.base.operations import BaseDatabaseOperations
 from django.utils import six, timezone
 from django.utils.encoding import force_text
+
 
 class DatabaseOperations(BaseDatabaseOperations):
     compiler_module = "django.db.backends.mysql.compiler"
 
     # MySQL stores positive fields as UNSIGNED ints.
-    if hasattr(BaseDatabaseOperations, 'integer_field_ranges'):
-        integer_field_ranges = dict(BaseDatabaseOperations.integer_field_ranges,
-            PositiveSmallIntegerField=(0, 4294967295),
-            PositiveIntegerField=(0, 18446744073709551615),
-        )
+    integer_field_ranges = dict(BaseDatabaseOperations.integer_field_ranges,
+        PositiveSmallIntegerField=(0, 4294967295),
+        PositiveIntegerField=(0, 18446744073709551615),
+    )
 
     def date_extract_sql(self, lookup_type, field_name):
         # http://dev.mysql.com/doc/mysql/en/date-and-time-functions.html
@@ -80,19 +72,15 @@ class DatabaseOperations(BaseDatabaseOperations):
             sql = "CAST(DATE_FORMAT(%s, '%s') AS DATETIME)" % (field_name, format_str)
         return sql, params
 
-    def date_interval_sql(self, *args):
-        if len(args) == 3:
-            sql, connector, timedelta = args[0], args[1], args[2]
-            return "(%s %s INTERVAL '%d 0:0:%d:%d' DAY_MICROSECOND)" % (
-                sql, connector,
-                timedelta.days, timedelta.seconds, timedelta.microseconds)
-        else:   # 1.8
-            timedelta = args[0]
-            return "INTERVAL '%d 0:0:%d:%d' DAY_MICROSECOND" % (
-                timedelta.days, timedelta.seconds, timedelta.microseconds), []
+    def date_interval_sql(self, timedelta):
+        return "INTERVAL '%d 0:0:%d:%d' DAY_MICROSECOND" % (
+            timedelta.days, timedelta.seconds, timedelta.microseconds), []
 
     def format_for_duration_arithmetic(self, sql):
-        return 'INTERVAL %s MICROSECOND' % sql
+        if self.connection.features.supports_microsecond_precision:
+            return 'INTERVAL %s MICROSECOND' % sql
+        else:
+            return 'INTERVAL FLOOR(%s / 1000000) SECOND' % sql
 
     def drop_foreignkey_sql(self):
         return "DROP FOREIGN KEY"
@@ -103,7 +91,6 @@ class DatabaseOperations(BaseDatabaseOperations):
         columns. If no ordering would otherwise be applied, we don't want any
         implicit sorting going on.
         """
-        import django
         return [(None, ("NULL", [], False))]
 
     def fulltext_search_sql(self, field_name):
@@ -162,8 +149,10 @@ class DatabaseOperations(BaseDatabaseOperations):
             else:
                 raise ValueError("MySQL backend does not support timezone-aware datetimes when USE_TZ is False.")
 
-        # MySQL doesn't support microseconds
-        return six.text_type(value.replace(microsecond=0))
+        if not self.connection.features.supports_microsecond_precision:
+            value = value.replace(microsecond=0)
+
+        return six.text_type(value)
 
     def value_to_db_time(self, value):
         if value is None:
@@ -173,13 +162,7 @@ class DatabaseOperations(BaseDatabaseOperations):
         if timezone.is_aware(value):
             raise ValueError("MySQL backend does not support timezone-aware times.")
 
-        # MySQL doesn't support microseconds
-        return six.text_type(value.replace(microsecond=0))
-
-    def year_lookup_bounds_for_datetime_field(self, value):
-        # Again, no microseconds
-        first, second = super(DatabaseOperations, self).year_lookup_bounds_for_datetime_field(value)
-        return [first.replace(microsecond=0), second.replace(microsecond=0)]
+        return six.text_type(value)
 
     def max_name_length(self):
         return 64
@@ -227,4 +210,3 @@ class DatabaseOperations(BaseDatabaseOperations):
         if value is not None:
             value = force_text(value)
         return value
-
