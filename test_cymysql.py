@@ -16,10 +16,12 @@ DATABASES = {
     'default': {
         'ENGINE': 'mysql_cymysql',
         'NAME': 'test_cymysql',
+        'USER': 'root',
     },
     'other': {
         'ENGINE': 'mysql_cymysql',
         'NAME': 'test_cymysql2',
+        'USER': 'root',
     }
 }
 
