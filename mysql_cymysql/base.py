@@ -51,7 +51,7 @@ def parse_datetime_with_timezone_support(value,  charset=None, field=None, use_u
         dt = dt.replace(tzinfo=timezone.utc)
     return dt
 
-def adapt_datetime_with_timezone_support(value,  charset=None, field=None, use_unicode=None):
+def adapt_datetime_warn_on_aware_datetime(value,  charset=None, field=None, use_unicode=None):
     # Equivalent to DateTimeField.get_db_prep_value. Used only by raw SQL.
     if settings.USE_TZ:
         if timezone.is_naive(value):
@@ -60,8 +60,16 @@ def adapt_datetime_with_timezone_support(value,  charset=None, field=None, use_u
                           RuntimeWarning)
             default_timezone = timezone.get_default_timezone()
             value = timezone.make_aware(value, default_timezone)
+        elif timezone.is_aware(value):
+            warnings.warn(
+                "The MySQL database adapter received an aware datetime (%s), "
+                "probably from cursor.execute(). Update your code to pass a "
+                "naive datetime in the database connection's time zone (UTC by "
+                "default).", RemovedInDjango20Warning)
+            # This doesn't account for the database connection's timezone,
+            # which isn't known. (That's why this adapter is deprecated.)
         value = value.astimezone(timezone.utc).replace(tzinfo=None)
-    return escape_string(value.strftime("%Y-%m-%d %H:%M:%S"))
+    return escape_string(value.strftime("%Y-%m-%d %H:%M:%S.%f"))
 
 # MySQLdb-1.2.1 returns TIME columns as timedelta -- they are more like
 # timedelta in terms of actual behavior as they are signed and include days --
@@ -78,7 +86,7 @@ django_conversions = decoders.copy()
 django_conversions.update({
     FIELD_TYPE.TIME: typecast_time,
     FIELD_TYPE.DATETIME: parse_datetime_with_timezone_support,
-    datetime.datetime: adapt_datetime_with_timezone_support,
+    datetime.datetime: adapt_datetime_warn_on_aware_datetime,
 })
 
 
@@ -257,7 +265,7 @@ class DatabaseWrapper(BaseDatabaseWrapper):
         conn = Database.connect(**conn_params)
         conn.encoders[SafeText] = conn.encoders[six.text_type]
         conn.encoders[SafeBytes] = conn.encoders[bytes]
-        conn.encoders[datetime.datetime] = adapt_datetime_with_timezone_support
+        conn.encoders[datetime.datetime] = adapt_datetime_warn_on_aware_datetime
         return conn
 
     def init_connection_state(self):
