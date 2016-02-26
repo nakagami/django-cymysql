@@ -12,6 +12,7 @@ classifiers = [
     'Programming Language :: Python :: 2',
     'Programming Language :: Python :: 3',
     'Topic :: Database',
+    'Framework :: Django',
 ]
 
 setup(name='django-cymysql', 
