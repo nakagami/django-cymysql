@@ -17,11 +17,6 @@ from cymysql.constants import FIELD_TYPE, CLIENT
 from django.utils.functional import cached_property
 
 
-try:
-    import pytz
-except ImportError:
-    pytz = None
-
 from django.conf import settings
 from django.db import utils
 from django.db.backends import utils as backend_utils
@@ -65,11 +60,17 @@ def typecast_time(v):
     if isinstance(v, bytes):
         v = v.decode('ascii')
     return backend_utils.typecast_time(v)
+
+def typecast_decimal(v):
+    if isinstance(v, bytes):
+        v = v.decode('ascii')
+    return backend_utils.typecast_decimal(v)
+
 django_conversions = decoders.copy()
 django_conversions.update({
-    FIELD_TYPE.TIME: backend_utils.typecast_time,
-    FIELD_TYPE.DECIMAL: backend_utils.typecast_decimal,
-    FIELD_TYPE.NEWDECIMAL: backend_utils.typecast_decimal,
+    FIELD_TYPE.TIME: typecast_time,
+    FIELD_TYPE.DECIMAL: typecast_decimal,
+    FIELD_TYPE.NEWDECIMAL: typecast_decimal,
     datetime.datetime: adapt_datetime_warn_on_aware_datetime,
 })
 
@@ -80,11 +81,12 @@ django_conversions.update({
 # http://dev.mysql.com/doc/refman/5.0/en/news.html .
 server_version_re = re.compile(r'(\d{1,2})\.(\d{1,2})\.(\d{1,2})')
 
+
 # MySQLdb-1.2.1 and newer automatically makes use of SHOW WARNINGS on
 # MySQL-4.1 and newer, so the MysqlDebugWrapper is unnecessary. Since the
 # point is to raise Warnings as exceptions, this can be done with the Python
 # warning module, and this is setup when the connection is created, and the
-# standard util.CursorDebugWrapper can be used. Also, using sql_mode
+# standard backend_utils.CursorDebugWrapper can be used. Also, using sql_mode
 # TRADITIONAL will automatically cause most warnings to be treated as errors.
 
 class CursorWrapper(object):
@@ -129,6 +131,15 @@ class CursorWrapper(object):
 
     def __iter__(self):
         return iter(self.cursor)
+
+    def __enter__(self):
+        return self
+
+    def __exit__(self, type, value, traceback):
+        # Ticket #17671 - Close instead of passing thru to avoid backend
+        # specific behavior.
+        self.close()
+
 
 class DatabaseWrapper(BaseDatabaseWrapper):
     vendor = 'mysql'
