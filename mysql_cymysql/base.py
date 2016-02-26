@@ -41,33 +41,16 @@ from django.utils import timezone
 DatabaseError = Database.DatabaseError
 IntegrityError = Database.IntegrityError
 
-# It's impossible to import datetime_or_None directly from MySQLdb.times
-parse_datetime = decoders[FIELD_TYPE.DATETIME]
-
-def parse_datetime_with_timezone_support(value,  charset=None, field=None, use_unicode=None):
-    dt = parse_datetime(value)
-    # Confirm that dt is naive before overwriting its tzinfo.
-    if dt is not None and settings.USE_TZ and timezone.is_naive(dt):
-        dt = dt.replace(tzinfo=timezone.utc)
-    return dt
-
 def adapt_datetime_warn_on_aware_datetime(value,  charset=None, field=None, use_unicode=None):
     # Equivalent to DateTimeField.get_db_prep_value. Used only by raw SQL.
-    if settings.USE_TZ:
-        if timezone.is_naive(value):
-            warnings.warn("MySQL received a naive datetime (%s)"
-                          " while time zone support is active." % value,
-                          RuntimeWarning)
-            default_timezone = timezone.get_default_timezone()
-            value = timezone.make_aware(value, default_timezone)
-        elif timezone.is_aware(value):
-            warnings.warn(
-                "The MySQL database adapter received an aware datetime (%s), "
-                "probably from cursor.execute(). Update your code to pass a "
-                "naive datetime in the database connection's time zone (UTC by "
-                "default).", RuntimeWarning)
-            # This doesn't account for the database connection's timezone,
-            # which isn't known. (That's why this adapter is deprecated.)
+    if settings.USE_TZ and timezone.is_aware(value):
+        warnings.warn(
+            "The MySQL database adapter received an aware datetime (%s), "
+            "probably from cursor.execute(). Update your code to pass a "
+            "naive datetime in the database connection's time zone (UTC by "
+            "default).", RuntimeWarning)
+        # This doesn't account for the database connection's timezone,
+        # which isn't known. (That's why this adapter is deprecated.)
         value = value.astimezone(timezone.utc).replace(tzinfo=None)
     return escape_string(value.strftime("%Y-%m-%d %H:%M:%S.%f"))
 
@@ -87,7 +70,6 @@ django_conversions.update({
     FIELD_TYPE.TIME: backend_utils.typecast_time,
     FIELD_TYPE.DECIMAL: backend_utils.typecast_decimal,
     FIELD_TYPE.NEWDECIMAL: backend_utils.typecast_decimal,
-#    FIELD_TYPE.DATETIME: parse_datetime_with_timezone_support,
     datetime.datetime: adapt_datetime_warn_on_aware_datetime,
 })
 
