@@ -26,8 +26,8 @@ from django.conf import settings
 from django.db import utils
 from django.db.backends import utils as backend_utils
 from django.db.backends.base.base import BaseDatabaseWrapper
-from mysql_cymysql.client import DatabaseClient
-from mysql_cymysql.creation import DatabaseCreation
+from django.db.backends.mysql.client import DatabaseClient
+from django.db.backends.mysql.creation import DatabaseCreation
 from mysql_cymysql.features import DatabaseFeatures
 from mysql_cymysql.introspection import DatabaseIntrospection
 from django.db.backends.mysql.operations import DatabaseOperations
