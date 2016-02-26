@@ -84,8 +84,10 @@ def typecast_time(v):
     return backend_utils.typecast_time(v)
 django_conversions = decoders.copy()
 django_conversions.update({
-    FIELD_TYPE.TIME: typecast_time,
-    FIELD_TYPE.DATETIME: parse_datetime_with_timezone_support,
+    FIELD_TYPE.TIME: backend_utils.typecast_time,
+    FIELD_TYPE.DECIMAL: backend_utils.typecast_decimal,
+    FIELD_TYPE.NEWDECIMAL: backend_utils.typecast_decimal,
+#    FIELD_TYPE.DATETIME: parse_datetime_with_timezone_support,
     datetime.datetime: adapt_datetime_warn_on_aware_datetime,
 })
 
