@@ -3,7 +3,7 @@ django-cymysql
 
 Django mysql database backend for cymysql
 
-------------
+--------------------------------------------
 
 * Django 1.8, 1.9
 * CyMySQL (https://github.com/nakagami/CyMySQL) 0.8.x+
