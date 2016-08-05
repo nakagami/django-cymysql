@@ -6,7 +6,7 @@ python:
 
 install:
   - pip install cython
-#  - pip install git+https://github.com/nakagami/cymysql.git
+  - pip install git+https://github.com/nakagami/cymysql.git
   - python setup.py install
   - (cd /tmp; wget https://github.com/django/django/archive/1.9.9.tar.gz; tar zxf 1.9.9.tar.gz)
   - cp test_cymysql.py /tmp/django-1.9.9/tests
