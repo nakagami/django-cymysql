@@ -6,7 +6,7 @@ Django mysql database backend for cymysql
 Requirements
 -------------
 
-* Django 1.8, 1.9
+* Django 1.8, 1.9, 1.10
 * CyMySQL (https://github.com/nakagami/CyMySQL) 0.8.x+
 
 Installation
