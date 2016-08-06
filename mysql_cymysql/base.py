@@ -149,6 +149,7 @@ class DatabaseWrapper(BaseDatabaseWrapper):
     # If a column type is set to None, it won't be included in the output.
     _data_types = {
         'AutoField': 'integer AUTO_INCREMENT',
+        'BigAutoField': 'bigint AUTO_INCREMENT',
         'BinaryField': 'longblob',
         'BooleanField': 'bool',
         'CharField': 'varchar(%(max_length)s)',
@@ -264,13 +265,13 @@ class DatabaseWrapper(BaseDatabaseWrapper):
         return conn
 
     def init_connection_state(self):
-        cursor = self.connection.cursor()
-        # SQL_AUTO_IS_NULL in MySQL controls whether an AUTO_INCREMENT column
-        # on a recently-inserted row will return when the field is tested for
-        # NULL.  Disabling this value brings this aspect of MySQL in line with
-        # SQL standards.
-        cursor.execute('SET SQL_AUTO_IS_NULL = 0')
-        cursor.close()
+        if self.features.is_sql_auto_is_null_enabled:
+            with self.cursor() as cursor:
+                # SQL_AUTO_IS_NULL controls whether an AUTO_INCREMENT column on
+                # a recently inserted row will return when the field is tested
+                # for NULL. Disabling this brings this aspect of MySQL in line
+                # with SQL standards.
+                cursor.execute('SET SQL_AUTO_IS_NULL = 0')
 
     def create_cursor(self):
         cursor = self.connection.cursor()
@@ -327,19 +328,27 @@ class DatabaseWrapper(BaseDatabaseWrapper):
                 continue
             key_columns = self.introspection.get_key_columns(cursor, table_name)
             for column_name, referenced_table_name, referenced_column_name in key_columns:
-                cursor.execute("""
+                cursor.execute(
+                    """
                     SELECT REFERRING.`%s`, REFERRING.`%s` FROM `%s` as REFERRING
                     LEFT JOIN `%s` as REFERRED
                     ON (REFERRING.`%s` = REFERRED.`%s`)
-                    WHERE REFERRING.`%s` IS NOT NULL AND REFERRED.`%s` IS NULL"""
-                    % (primary_key_column_name, column_name, table_name, referenced_table_name,
-                    column_name, referenced_column_name, column_name, referenced_column_name))
+                    WHERE REFERRING.`%s` IS NOT NULL AND REFERRED.`%s` IS NULL
+                    """ % (
+                        primary_key_column_name, column_name, table_name,
+                        referenced_table_name, column_name, referenced_column_name,
+                        column_name, referenced_column_name,
+                    )
+                )
                 for bad_row in cursor.fetchall():
-                    raise utils.IntegrityError("The row in table '%s' with primary key '%s' has an invalid "
+                    raise utils.IntegrityError(
+                        "The row in table '%s' with primary key '%s' has an invalid "
                         "foreign key: %s.%s contains a value '%s' that does not have a corresponding value in %s.%s."
-                        % (table_name, bad_row[0],
-                        table_name, column_name, bad_row[1],
-                        referenced_table_name, referenced_column_name))
+                        % (
+                            table_name, bad_row[0], table_name, column_name,
+                            bad_row[1], referenced_table_name, referenced_column_name,
+                        )
+                    )
 
     def is_usable(self):
         if not self.connection._is_connect():
@@ -353,8 +362,9 @@ class DatabaseWrapper(BaseDatabaseWrapper):
 
     @cached_property
     def mysql_version(self):
-        with self.temporary_connection():
-            server_info = self.connection.get_server_info()
+        with self.temporary_connection() as cursor:
+            cursor.execute('SELECT VERSION()')
+            server_info = cursor.fetchone()[0]
         match = server_version_re.match(server_info)
         if not match:
             raise Exception('Unable to determine MySQL version from version string %r' % server_info)
