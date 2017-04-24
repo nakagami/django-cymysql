@@ -5,7 +5,7 @@ python:
   - "3.5"
 
 install:
-  - pip install cython
+  - pip install cython pytz
   - pip install git+https://github.com/nakagami/cymysql.git
   - python setup.py install
   - (cd /tmp; wget https://github.com/django/django/archive/1.11.tar.gz; tar zxf 1.11.tar.gz)
