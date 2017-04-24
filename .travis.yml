@@ -8,18 +8,15 @@ install:
   - pip install cython
   - pip install git+https://github.com/nakagami/cymysql.git
   - python setup.py install
-  - (cd /tmp; wget https://github.com/django/django/archive/1.10.tar.gz; tar zxf 1.10.tar.gz)
-  - cp test_cymysql.py /tmp/django-1.10/tests
-  - (cd /tmp; wget https://github.com/django/django/archive/1.9.9.tar.gz; tar zxf 1.9.9.tar.gz)
-  - cp test_cymysql.py /tmp/django-1.9.9/tests
-  - (cd /tmp; wget https://github.com/django/django/archive/1.8.14.tar.gz; tar zxf 1.8.14.tar.gz)
-  - cp test_cymysql.py /tmp/django-1.8.14/tests
+  - (cd /tmp; wget https://github.com/django/django/archive/1.11.tar.gz; tar zxf 1.11.tar.gz)
+  - cp test_cymysql.py /tmp/django-1.11/tests
+  - (cd /tmp; wget https://github.com/django/django/archive/1.10.7.tar.gz; tar zxf 1.10.7.tar.gz)
+  - cp test_cymysql.py /tmp/django-1.10.7/tests
 
 #before_script:
 #  - mysql -e 'create database test_cymysql DEFAULT CHARACTER SET utf8 DEFAULT COLLATE utf8_general_ci;'
 #  - mysql -e 'create database test_cymysql2 DEFAULT CHARACTER SET utf8 DEFAULT COLLATE utf8_general_ci;'
 
 script:
-  - (cd /tmp/django-1.10/tests; PYTHONPATH='..' python runtests.py --settings=test_cymysql --noinput --parallel=1)
-  - (cd /tmp/django-1.9.9/tests; PYTHONPATH='..' python runtests.py --settings=test_cymysql --noinput --parallel=1)
-  - (cd /tmp/django-1.8.14/tests; PYTHONPATH='..' python runtests.py --settings=test_cymysql --noinput)
+  - (cd /tmp/django-1.11/tests; PYTHONPATH='..' python runtests.py --settings=test_cymysql --noinput --parallel=1)
+  - (cd /tmp/django-1.10.7/tests; PYTHONPATH='..' python runtests.py --settings=test_cymysql --noinput --parallel=1)
