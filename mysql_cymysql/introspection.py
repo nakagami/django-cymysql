@@ -1,4 +1,3 @@
-import warnings
 from collections import namedtuple
 
 from cymysql.constants import FIELD_TYPE
@@ -6,9 +5,16 @@ from cymysql.constants import FIELD_TYPE
 from django.db.backends.base.introspection import (
     BaseDatabaseIntrospection, FieldInfo, TableInfo,
 )
-from django.db.models.indexes import Index
+
+try:
+    from django.db.models.indexes import Index
+except ImportError:
+    Index = None
 from django.utils.datastructures import OrderedSet
-from django.utils.deprecation import RemovedInDjango21Warning
+try:
+    from django.utils.deprecation import RemovedInDjango21Warning
+except ImportError:
+    RemovedInDjango21Warning = None
 
 FieldInfo = namedtuple('FieldInfo', FieldInfo._fields + ('extra', 'is_unsigned'))
 InfoLine = namedtuple('InfoLine', 'col_name data_type max_len num_prec num_scale extra column_default is_unsigned')
@@ -133,10 +139,12 @@ class DatabaseIntrospection(BaseDatabaseIntrospection):
         return key_columns
 
     def get_indexes(self, cursor, table_name):
-        warnings.warn(
-            "get_indexes() is deprecated in favor of get_constraints().",
-            RemovedInDjango21Warning, stacklevel=2
-        )
+        if RemovedInDjango21Warning:
+            import warnings
+            warnings.warn(
+                "get_indexes() is deprecated in favor of get_constraints().",
+                RemovedInDjango21Warning, stacklevel=2
+            )
         cursor.execute("SHOW INDEX FROM %s" % self.connection.ops.quote_name(table_name))
         # Do a two-pass search for indexes: on first pass check which indexes
         # are multicolumn, on second pass check which single-column indexes
@@ -227,7 +235,8 @@ class DatabaseIntrospection(BaseDatabaseIntrospection):
                     'foreign_key': None,
                 }
             constraints[index]['index'] = True
-            constraints[index]['type'] = Index.suffix if type_ == 'BTREE' else type_.lower()
+            if Index:
+                constraints[index]['type'] = Index.suffix if type_ == 'BTREE' else type_.lower()
             constraints[index]['columns'].add(column)
         # Convert the sorted sets to lists
         for constraint in constraints.values():
