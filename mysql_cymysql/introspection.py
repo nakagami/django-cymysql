@@ -50,11 +50,7 @@ class DatabaseIntrospection(BaseDatabaseIntrospection):
                 return 'AutoField'
             elif field_type == 'BigIntegerField':
                 return 'BigAutoField'
-        if django.VERSION[:2] > (1, 10) and description.is_unsigned:
-            if field_type == 'IntegerField':
-                return 'PositiveIntegerField'
-            elif field_type == 'SmallIntegerField':
-                return 'PositiveSmallIntegerField'
+
         return field_type
 
     def get_table_list(self, cursor):
