@@ -391,14 +391,7 @@ class DatabaseWrapper(BaseDatabaseWrapper):
                     )
 
     def is_usable(self):
-        if not self.connection._is_connect():
-            return False
-        try:
-            self.connection.ping()
-        except DatabaseError:
-            return False
-        else:
-            return True
+        return self.connection._is_connect()
 
     @cached_property
     def mysql_version(self):
