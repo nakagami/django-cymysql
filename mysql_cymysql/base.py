@@ -218,8 +218,18 @@ class DatabaseWrapper(BaseDatabaseWrapper):
         'iendswith': "LIKE CONCAT('%%', {})",
     }
 
+
+    # Classes instantiated in __init__().
+    client_class = DatabaseClient
+    creation_class = DatabaseCreation
+    features_class = DatabaseFeatures
+    introspection_class = DatabaseIntrospection
+    ops_class = DatabaseOperations
+    validation_class = DatabaseValidation
+
     Database = Database
     SchemaEditorClass = DatabaseSchemaEditor
+
 
     def __init__(self, *args, **kwargs):
         super(DatabaseWrapper, self).__init__(*args, **kwargs)
@@ -273,7 +283,7 @@ class DatabaseWrapper(BaseDatabaseWrapper):
                 # with SQL standards.
                 cursor.execute('SET SQL_AUTO_IS_NULL = 0')
 
-    def create_cursor(self):
+    def create_cursor(self, name=None):
         cursor = self.connection.cursor()
         return CursorWrapper(cursor)
 
