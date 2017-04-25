@@ -5,6 +5,10 @@ import django
 from django.db.backends.base.introspection import (
     BaseDatabaseIntrospection, FieldInfo, TableInfo,
 )
+try:
+    from django.db.models.indexes import Index
+except ImportError:
+    Index = None
 
 from django.utils.datastructures import OrderedSet
 try:
@@ -247,6 +251,8 @@ class DatabaseIntrospection(BaseDatabaseIntrospection):
                     'foreign_key': None,
                 }
             constraints[index]['index'] = True
+            if Index:
+                constraints[index]['type'] = Index.suffix if type_ == 'BTREE' else type_.lower()
             constraints[index]['columns'].add(column)
         # Convert the sorted sets to lists
         for constraint in constraints.values():
