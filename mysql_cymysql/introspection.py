@@ -6,10 +6,6 @@ from django.db.backends.base.introspection import (
     BaseDatabaseIntrospection, FieldInfo, TableInfo,
 )
 
-try:
-    from django.db.models.indexes import Index
-except ImportError:
-    Index = None
 from django.utils.datastructures import OrderedSet
 try:
     from django.utils.deprecation import RemovedInDjango21Warning
@@ -48,7 +44,7 @@ class DatabaseIntrospection(BaseDatabaseIntrospection):
     }
 
     def get_field_type(self, data_type, description):
-        field_type = super().get_field_type(data_type, description)
+        field_type = super(DatabaseIntrospection, self).get_field_type(data_type, description)
         if 'auto_increment' in description.extra:
             if field_type == 'IntegerField':
                 return 'AutoField'
@@ -244,18 +240,17 @@ class DatabaseIntrospection(BaseDatabaseIntrospection):
                 constraints[constraint]['unique'] = True
         # Now add in the indexes
         cursor.execute("SHOW INDEX FROM %s" % self.connection.ops.quote_name(table_name))
-        for table, non_unique, index, colseq, column, type_ in [x[:5] + (x[10],) for x in cursor.fetchall()]:
+        for table, non_unique, index, colseq, column in [x[:5] for x in cursor.fetchall()]:
             if index not in constraints:
                 constraints[index] = {
                     'columns': OrderedSet(),
                     'primary_key': False,
                     'unique': False,
+                    'index': True,
                     'check': False,
                     'foreign_key': None,
                 }
             constraints[index]['index'] = True
-            if Index:
-                constraints[index]['type'] = Index.suffix if type_ == 'BTREE' else type_.lower()
             constraints[index]['columns'].add(column)
         # Convert the sorted sets to lists
         for constraint in constraints.values():

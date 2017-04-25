@@ -3,6 +3,11 @@ from django.utils.functional import cached_property
 
 from .base import Database
 
+try:
+    import pytz
+except ImportError:
+    pytz = None
+
 
 class DatabaseFeatures(BaseDatabaseFeatures):
     empty_fetchmany_value = []
@@ -52,6 +57,15 @@ class DatabaseFeatures(BaseDatabaseFeatures):
 
     @cached_property
     def has_zoneinfo_database(self):
+        # MySQL accepts full time zones names (eg. Africa/Nairobi) but rejects
+        # abbreviations (eg. EAT). When pytz isn't installed and the current
+        # time zone is LocalTimezone (the only sensible value in this
+        # context), the current time zone name will be an abbreviation. As a
+        # consequence, MySQL cannot perform time zone conversions reliably.
+        if pytz is None:
+            return False
+
+
         # Test if the time zone definitions are installed.
         with self.connection.cursor() as cursor:
             cursor.execute("SELECT 1 FROM mysql.time_zone LIMIT 1")
@@ -64,8 +78,7 @@ class DatabaseFeatures(BaseDatabaseFeatures):
     def is_sql_auto_is_null_enabled(self):
         with self.connection.cursor() as cursor:
             cursor.execute('SELECT @@SQL_AUTO_IS_NULL')
-            result = cursor.fetchone()
-            return result and result[0] == 1
+            return cursor.fetchone()[0] == 1
 
     @cached_property
     def supports_transactions(self):
@@ -78,5 +91,4 @@ class DatabaseFeatures(BaseDatabaseFeatures):
     def ignores_table_name_case(self):
         with self.connection.cursor() as cursor:
             cursor.execute('SELECT @@LOWER_CASE_TABLE_NAMES')
-            result = cursor.fetchone()
-            return result and result[0] != 0
+            return cursor.fetchone()[0] != 0
