@@ -294,7 +294,6 @@ class DatabaseWrapper(BaseDatabaseWrapper):
         conn = Database.connect(**conn_params)
         conn.encoders[SafeText] = conn.encoders[six.text_type]
         conn.encoders[SafeBytes] = conn.encoders[bytes]
-        conn.encoders[datetime.datetime] = adapt_datetime_warn_on_aware_datetime
         return conn
 
     def init_connection_state(self):
