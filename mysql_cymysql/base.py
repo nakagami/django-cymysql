@@ -36,19 +36,6 @@ from django.utils import timezone
 DatabaseError = Database.DatabaseError
 IntegrityError = Database.IntegrityError
 
-def adapt_datetime_warn_on_aware_datetime(value,  charset=None, field=None, use_unicode=None):
-    # Equivalent to DateTimeField.get_db_prep_value. Used only by raw SQL.
-    if settings.USE_TZ and timezone.is_aware(value):
-        warnings.warn(
-            "The MySQL database adapter received an aware datetime (%s), "
-            "probably from cursor.execute(). Update your code to pass a "
-            "naive datetime in the database connection's time zone (UTC by "
-            "default).", RuntimeWarning)
-        # This doesn't account for the database connection's timezone,
-        # which isn't known. (That's why this adapter is deprecated.)
-        value = value.astimezone(timezone.utc).replace(tzinfo=None)
-    return escape_string(value.strftime("%Y-%m-%d %H:%M:%S.%f"))
-
 # MySQLdb-1.2.1 returns TIME columns as timedelta -- they are more like
 # timedelta in terms of actual behavior as they are signed and include days --
 # and Django expects time, so we still need to override that. We also need to
@@ -71,7 +58,6 @@ django_conversions.update({
     FIELD_TYPE.TIME: typecast_time,
     FIELD_TYPE.DECIMAL: typecast_decimal,
     FIELD_TYPE.NEWDECIMAL: typecast_decimal,
-    datetime.datetime: adapt_datetime_warn_on_aware_datetime,
 })
 
 
