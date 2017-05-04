@@ -16,8 +16,8 @@ classifiers = [
 ]
 
 setup(name='django-cymysql', 
-        version='0.5.0',
-        description = __doc__, 
+        version='0.5.1',
+        description='Django database backend for cymysql',
         url='https://github.com/nakagami/django-cymysql/',
         classifiers=classifiers,
         keywords=['MySQL', 'cymysql'],
@@ -25,5 +25,4 @@ setup(name='django-cymysql',
         author='Hajime Nakagami',
         author_email='nakagami@gmail.com',
         packages = ['mysql_cymysql'],
-        long_description=__doc__,
 )
