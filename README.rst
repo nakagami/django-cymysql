@@ -17,7 +17,7 @@ Install with Django x.y.z.
 ::
 
     $ pip install cymysql
-    $ pip install "django-cymysql>=x.y,<x,y+1"
+    $ pip install "django-cymysql>=x.y,<x.y+1"
     $ pip install Django==x.y.z
 
 Database
