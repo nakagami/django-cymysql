@@ -7,15 +7,18 @@ Requirements
 -------------
 
 * Django 1.10, 1.11
-* CyMySQL (https://github.com/nakagami/CyMySQL) 0.8.9+
+* CyMySQL (https://github.com/nakagami/CyMySQL) 1.0+
 
 Installation
 ------------
 
+Install with Django x.y.z.
+
 ::
 
     $ pip install cymysql
-    $ pip install django-cymysql
+    $ pip install "django-cymysql>=x.y,<x,y+1"
+    $ pip install Django==x.y.z
 
 Database
 ------------

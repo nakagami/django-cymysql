@@ -16,7 +16,7 @@ classifiers = [
 ]
 
 setup(name='django-cymysql', 
-        version='0.5.1',
+        version='1.10.0',
         description='Django database backend for cymysql',
         url='https://github.com/nakagami/django-cymysql/',
         classifiers=classifiers,
