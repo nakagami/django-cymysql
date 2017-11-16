@@ -28,9 +28,14 @@ from django.db.backends.mysql.validation import DatabaseValidation              
 # MySQLdb returns TIME columns as timedelta -- they are more like timedelta in
 # terms of actual behavior as they are signed and include days -- and Django
 # expects time.
+def typecast_time(v):
+    if isinstance(v, bytes):
+        v = v.decode('ascii')
+    return backend_utils.typecast_time(v)
+
 django_conversions = decoders.copy()
 django_conversions.update({
-    FIELD_TYPE.TIME: backend_utils.typecast_time,
+    FIELD_TYPE.TIME: typecast_time,
 })
 
 # This should match the numerical portion of the version numbers (we can treat
