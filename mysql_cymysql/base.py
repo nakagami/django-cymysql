@@ -17,13 +17,13 @@ from cymysql.constants import FIELD_TYPE, CLIENT
 
 
 # Some of these import MySQLdb, so import them after checking if it's installed.
-from .client import DatabaseClient                          # isort:skip
-from .creation import DatabaseCreation                      # isort:skip
+from djabgo.db.backends.mysql.client import DatabaseClient                          # isort:skip
+from djabgo.db.backends.mysql.creation import DatabaseCreation                      # isort:skip
 from .features import DatabaseFeatures                      # isort:skip
 from .introspection import DatabaseIntrospection            # isort:skip
-from .operations import DatabaseOperations                  # isort:skip
+from djabgo.db.backends.mysql.operations import DatabaseOperations                  # isort:skip
 from .schema import DatabaseSchemaEditor                    # isort:skip
-from .validation import DatabaseValidation                  # isort:skip
+from djabgo.db.backends.mysql.validation import DatabaseValidation                  # isort:skip
 
 # MySQLdb returns TIME columns as timedelta -- they are more like timedelta in
 # terms of actual behavior as they are signed and include days -- and Django
