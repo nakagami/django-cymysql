@@ -11,7 +11,7 @@ install:
   - (cd /tmp; wget https://github.com/django/django/archive/2.0rc1.tar.gz; tar zxf 2.0rc1.tar.gz)
   - cp test_cymysql.py /tmp/django-2.0rc1/tests
 
-#before_script:
+before_script:
   - mysql -e 'create database test_cymysql DEFAULT CHARACTER SET utf8 DEFAULT COLLATE utf8_general_ci;'
   - mysql -e 'create database test_cymysql2 DEFAULT CHARACTER SET utf8 DEFAULT COLLATE utf8_general_ci;'
 
