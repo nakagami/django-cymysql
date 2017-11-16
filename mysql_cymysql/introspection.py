@@ -1,25 +1,14 @@
 from collections import namedtuple
 
 from cymysql.constants import FIELD_TYPE
-import django
+
 from django.db.backends.base.introspection import (
     BaseDatabaseIntrospection, FieldInfo, TableInfo,
 )
-try:
-    from django.db.models.indexes import Index
-except ImportError:
-    Index = None
-
+from django.db.models.indexes import Index
 from django.utils.datastructures import OrderedSet
-try:
-    from django.utils.deprecation import RemovedInDjango21Warning
-except ImportError:
-    RemovedInDjango21Warning = None
 
-if django.VERSION[:2] == (1, 10):
-    FieldInfo = namedtuple('FieldInfo', FieldInfo._fields + ('extra', 'default'))
-else:
-    FieldInfo = namedtuple('FieldInfo', FieldInfo._fields + ('extra', 'is_unsigned'))
+FieldInfo = namedtuple('FieldInfo', FieldInfo._fields + ('extra', 'is_unsigned'))
 InfoLine = namedtuple('InfoLine', 'col_name data_type max_len num_prec num_scale extra column_default is_unsigned')
 
 
@@ -48,13 +37,17 @@ class DatabaseIntrospection(BaseDatabaseIntrospection):
     }
 
     def get_field_type(self, data_type, description):
-        field_type = super(DatabaseIntrospection, self).get_field_type(data_type, description)
+        field_type = super().get_field_type(data_type, description)
         if 'auto_increment' in description.extra:
             if field_type == 'IntegerField':
                 return 'AutoField'
             elif field_type == 'BigIntegerField':
                 return 'BigAutoField'
-
+        if description.is_unsigned:
+            if field_type == 'IntegerField':
+                return 'PositiveIntegerField'
+            elif field_type == 'SmallIntegerField':
+                return 'PositiveSmallIntegerField'
         return field_type
 
     def get_table_list(self, cursor):
@@ -93,38 +86,29 @@ class DatabaseIntrospection(BaseDatabaseIntrospection):
         fields = []
         for line in cursor.description:
             col_name = line[0]
-            if django.VERSION[:2] == (1, 10):
-                fields.append(
-                    FieldInfo(*(
-                        (col_name,) +
-                        line[1:3] +
-                        (
-                            to_int(field_info[col_name].max_len) or line[3],
-                            to_int(field_info[col_name].num_prec) or line[4],
-                            to_int(field_info[col_name].num_scale) or line[5],
-                            line[6],
-                            field_info[col_name].extra,
-                            field_info[col_name].column_default,
-                        )
-                    ))
-                )
-            else:
-                fields.append(
-                    FieldInfo(*(
-                        (col_name,) +
-                        line[1:3] +
-                        (
-                            to_int(field_info[col_name].max_len) or line[3],
-                            to_int(field_info[col_name].num_prec) or line[4],
-                            to_int(field_info[col_name].num_scale) or line[5],
-                            line[6],
-                            field_info[col_name].column_default,
-                            field_info[col_name].extra,
-                            field_info[col_name].is_unsigned,
-                        )
-                    ))
-                )
+            fields.append(
+                FieldInfo(*(
+                    (col_name,) +
+                    line[1:3] +
+                    (
+                        to_int(field_info[col_name].max_len) or line[3],
+                        to_int(field_info[col_name].num_prec) or line[4],
+                        to_int(field_info[col_name].num_scale) or line[5],
+                        line[6],
+                        field_info[col_name].column_default,
+                        field_info[col_name].extra,
+                        field_info[col_name].is_unsigned,
+                    )
+                ))
+            )
         return fields
+
+    def get_sequences(self, cursor, table_name, table_fields=()):
+        for field_info in self.get_table_description(cursor, table_name):
+            if 'auto_increment' in field_info.extra:
+                # MySQL allows only one auto-increment column per table.
+                return [{'table': table_name, 'column': field_info.name}]
+        return []
 
     def get_relations(self, cursor, table_name):
         """
@@ -152,35 +136,6 @@ class DatabaseIntrospection(BaseDatabaseIntrospection):
                 AND referenced_column_name IS NOT NULL""", [table_name])
         key_columns.extend(cursor.fetchall())
         return key_columns
-
-    def get_indexes(self, cursor, table_name):
-        if RemovedInDjango21Warning:
-            import warnings
-            warnings.warn(
-                "get_indexes() is deprecated in favor of get_constraints().",
-                RemovedInDjango21Warning, stacklevel=2
-            )
-        cursor.execute("SHOW INDEX FROM %s" % self.connection.ops.quote_name(table_name))
-        # Do a two-pass search for indexes: on first pass check which indexes
-        # are multicolumn, on second pass check which single-column indexes
-        # are present.
-        rows = list(cursor.fetchall())
-        multicol_indexes = set()
-        for row in rows:
-            if row[3] > 1:
-                multicol_indexes.add(row[2])
-        indexes = {}
-        for row in rows:
-            if row[2] in multicol_indexes:
-                continue
-            if row[4] not in indexes:
-                indexes[row[4]] = {'primary_key': False, 'unique': False}
-            # It's possible to have the unique and PK constraints in separate indexes.
-            if row[2] == 'PRIMARY':
-                indexes[row[4]]['primary_key'] = True
-            if not row[1]:
-                indexes[row[4]]['unique'] = True
-        return indexes
 
     def get_storage_engine(self, cursor, table_name):
         """
@@ -250,8 +205,7 @@ class DatabaseIntrospection(BaseDatabaseIntrospection):
                     'foreign_key': None,
                 }
             constraints[index]['index'] = True
-            if Index:
-                constraints[index]['type'] = Index.suffix if type_ == 'BTREE' else type_.lower()
+            constraints[index]['type'] = Index.suffix if type_ == 'BTREE' else type_.lower()
             constraints[index]['columns'].add(column)
         # Convert the sorted sets to lists
         for constraint in constraints.values():
