@@ -12,8 +12,14 @@ install:
   - cp test_cymysql.py /tmp/django-2.0rc1/tests
 
 before_script:
-  - mysql -e 'create database test_test_cymysql DEFAULT CHARACTER SET utf8mb4 DEFAULT COLLATE utf8mb4_general_ci;'
-  - mysql -e 'create database test_test_cymysql2 DEFAULT CHARACTER SET utf8mb4 DEFAULT COLLATE utf8mb4_general_ci;'
+  - |
+    echo -e "[mysqld]
+    character_set_server=utf8mb4
+    collation_server=utf8mb4_unicode_ci
+    innodb_large_prefix=ON
+    innodb_file_format=Barracuda
+    innodb_file_format_max=Barracuda" | sudo tee /etc/mysql/conf.d/travis.cnf
+  - sudo /etc/init.d/mysql restart
 
 script:
   - (cd /tmp/django-2.0rc1/tests; PYTHONPATH='..' python runtests.py --settings=test_cymysql --noinput --parallel=1)
