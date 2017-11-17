@@ -1,3 +1,4 @@
+dist: trusty
 language: python
 sudo: false
 python:
@@ -10,12 +11,6 @@ install:
   - python setup.py install
   - (cd /tmp; wget https://github.com/django/django/archive/2.0rc1.tar.gz; tar zxf 2.0rc1.tar.gz)
   - cp test_cymysql.py /tmp/django-2.0rc1/tests
-
-before_script:
-  - |
-    echo -e "[mysqld]
-    character_set_server=utf8mb4" | sudo tee /etc/mysql/conf.d/travis.cnf
-  - sudo /etc/init.d/mysql restart
 
 script:
   - (cd /tmp/django-2.0rc1/tests; PYTHONPATH='..' python runtests.py --settings=test_cymysql --noinput --parallel=1)
