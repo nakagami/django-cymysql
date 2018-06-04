@@ -7,9 +7,8 @@ class DatabaseFeatures(BaseDatabaseFeatures):
     update_can_self_select = False
     allows_group_by_pk = True
     related_fields_match_type = True
-    allow_sliced_subqueries = False
+    allow_sliced_subqueries_with_in = False
     has_select_for_update = True
-    has_select_for_update_nowait = False
     supports_forward_references = False
     supports_regex_backreferencing = False
     supports_date_lookup_using_string = False
@@ -17,6 +16,7 @@ class DatabaseFeatures(BaseDatabaseFeatures):
     can_introspect_binary_field = False
     can_introspect_small_integer_field = True
     can_introspect_positive_integer_field = True
+    introspected_boolean_field_type = 'IntegerField'
     supports_index_column_ordering = False
     supports_timezones = False
     requires_explicit_null_ordering_when_grouping = True
@@ -46,6 +46,9 @@ class DatabaseFeatures(BaseDatabaseFeatures):
             SET V_I = P_I;
         END;
     """
+    db_functions_convert_bytes_to_str = True
+    # Alias MySQL's TRADITIONAL to TEXT for consistency with other backends.
+    supported_explain_formats = {'JSON', 'TEXT', 'TRADITIONAL'}
 
     @cached_property
     def _mysql_storage_engine(self):
