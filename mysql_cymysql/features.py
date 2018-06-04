@@ -70,15 +70,23 @@ class DatabaseFeatures(BaseDatabaseFeatures):
             cursor.execute("SELECT 1 FROM mysql.time_zone LIMIT 1")
             return cursor.fetchone() is not None
 
-    def introspected_boolean_field_type(self, *args, **kwargs):
-        return 'IntegerField'
-
     @cached_property
     def is_sql_auto_is_null_enabled(self):
         with self.connection.cursor() as cursor:
             cursor.execute('SELECT @@SQL_AUTO_IS_NULL')
             result = cursor.fetchone()
             return result and result[0] == 1
+
+    @cached_property
+    def has_select_for_update_skip_locked(self):
+        return self.connection.mysql_version >= (8, 0, 1)
+
+    has_select_for_update_nowait = has_select_for_update_skip_locked
+
+    @cached_property
+    def needs_explain_extended(self):
+        # EXTENDED is deprecated (and not required) in 5.7 and removed in 8.0.
+        return self.connection.mysql_version < (5, 7)
 
     @cached_property
     def supports_over_clause(self):
