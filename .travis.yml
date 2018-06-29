@@ -12,7 +12,7 @@ before_script:
     innodb_file_format=Barracuda
     innodb_file_format_max=Barracuda" | sudo tee /etc/mysql/conf.d/travis.cnf
   - sudo /etc/init.d/mysql restart
-  - mysql_tzinfo_to_sql /usr/share/zoneinfo | mysql -u root
+  - mysql_tzinfo_to_sql /usr/share/zoneinfo | mysql -u root -p
 
 install:
 #  - pip install cython
