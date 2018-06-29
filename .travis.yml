@@ -1,6 +1,6 @@
 dist: trusty
 language: python
-sudo: false
+sudo: true
 python:
   - "3.6"
 
