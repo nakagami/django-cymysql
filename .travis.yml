@@ -2,7 +2,7 @@ dist: trusty
 language: python
 sudo: false
 python:
-  - "3.5"
+  - "3.6"
 
 before_script:
   - |
@@ -18,8 +18,8 @@ install:
   - pip install pytz
   - pip install git+https://github.com/nakagami/cymysql.git
   - python setup.py install
-  - (cd /tmp; wget https://github.com/django/django/archive/2.0rc1.tar.gz; tar zxf 2.0rc1.tar.gz)
-  - cp test_cymysql.py /tmp/django-2.0rc1/tests
+  - (cd /tmp; wget https://github.com/django/django/archive/2.1b1.tar.gz; tar zxf 2.1b1.tar.gz)
+  - cp test_cymysql.py /tmp/django-2.1b1/tests
 
 script:
-  - (cd /tmp/django-2.0rc1/tests; PYTHONPATH='..' python runtests.py --settings=test_cymysql --noinput --parallel=1)
+  - (cd /tmp/django-2.1b1/tests; PYTHONPATH='..' python runtests.py --settings=test_cymysql --noinput --parallel=1)
