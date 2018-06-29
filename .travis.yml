@@ -27,4 +27,4 @@ install:
 
 script:
   - cd /tmp/django-2.1b1/tests
-  - ./runtests.py --settings=test_cymysql --noinput
+  - ./runtests.py --settings=test_cymysql --noinput --parallel=1
