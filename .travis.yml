@@ -26,5 +26,5 @@ install:
   - pip install -r requirements/py3.txt
 
 script:
-  - cd /tmp/djang-2.1b1/tests
+  - cd /tmp/django-2.1b1/tests
   - ./runtests.py --settings=test_cymysql --noinput
