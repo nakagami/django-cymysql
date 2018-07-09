@@ -2,7 +2,7 @@ dist: trusty
 language: python
 sudo: false
 python:
-  - "3.5"
+  - "3.6"
 
 before_script:
   - |
@@ -12,14 +12,19 @@ before_script:
     innodb_file_format=Barracuda
     innodb_file_format_max=Barracuda" | sudo tee /etc/mysql/conf.d/travis.cnf
   - sudo /etc/init.d/mysql restart
+  - mysql_tzinfo_to_sql /usr/share/zoneinfo | mysql -u root mysql
 
 install:
 #  - pip install cython
   - pip install pytz
   - pip install git+https://github.com/nakagami/cymysql.git
   - python setup.py install
-  - (cd /tmp; wget https://github.com/django/django/archive/2.0rc1.tar.gz; tar zxf 2.0rc1.tar.gz)
-  - cp test_cymysql.py /tmp/django-2.0rc1/tests
+  - (cd /tmp; wget https://github.com/django/django/archive/2.1b1.tar.gz; tar zxf 2.1b1.tar.gz)
+  - cp test_cymysql.py /tmp/django-2.1b1/tests
+  - cd /tmp/django-2.1b1/tests
+  - pip install -e ..
+  - pip install -r requirements/py3.txt
 
 script:
-  - (cd /tmp/django-2.0rc1/tests; PYTHONPATH='..' python runtests.py --settings=test_cymysql --noinput --parallel=1)
+  - cd /tmp/django-2.1b1/tests
+  - ./runtests.py --settings=test_cymysql --noinput --parallel=1
