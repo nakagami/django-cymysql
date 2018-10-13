@@ -21,7 +21,7 @@ from django.db.backends.mysql.client import DatabaseClient                      
 from django.db.backends.mysql.creation import DatabaseCreation                      # isort:skip
 from .features import DatabaseFeatures                      # isort:skip
 from .introspection import DatabaseIntrospection            # isort:skip
-from django.db.backends.mysql.operations import DatabaseOperations                  # isort:skip
+from .operations import DatabaseOperations                  # isort:skip
 from .schema import DatabaseSchemaEditor                    # isort:skip
 from django.db.backends.mysql.validation import DatabaseValidation                  # isort:skip
 
