@@ -19,12 +19,12 @@ install:
   - pip install pytz
   - pip install git+https://github.com/nakagami/cymysql.git
   - python setup.py install
-  - (cd /tmp; wget https://github.com/django/django/archive/2.1.tar.gz; tar zxf 2.1.tar.gz)
-  - cp test_cymysql.py /tmp/django-2.1/tests
-  - cd /tmp/django-2.1/tests
+  - (cd /tmp; wget https://github.com/django/django/archive/2.2.tar.gz; tar zxf 2.2.tar.gz)
+  - cp test_cymysql.py /tmp/django-2.2/tests
+  - cd /tmp/django-2.2/tests
   - pip install -e ..
   - pip install -r requirements/py3.txt
 
 script:
-  - cd /tmp/django-2.1/tests
+  - cd /tmp/django-2.2/tests
   - ./runtests.py --settings=test_cymysql --noinput
