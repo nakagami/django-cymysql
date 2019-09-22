@@ -64,6 +64,8 @@ class CursorWrapper:
         self.cursor = cursor
 
     def execute(self, query, args=None):
+        if args:
+            args = [a.value if isinstance(a, enum.Enum) else a for a in args]
         try:
             # args is None means no string interpolation
             return self.cursor.execute(query, args)
