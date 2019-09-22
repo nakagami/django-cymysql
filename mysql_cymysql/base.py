@@ -4,6 +4,7 @@ MySQL database backend for Django.
 Requires CyMySQL: https://github.com/nakagami/CyMySQL
 """
 import re
+import enum
 
 from django.core.exceptions import ImproperlyConfigured
 from django.db import utils
@@ -74,6 +75,8 @@ class CursorWrapper:
             raise
 
     def executemany(self, query, args):
+        if args:
+            args = [a.value if isinstance(a, enum.Enum) else a for a in args]
         try:
             return self.cursor.executemany(query, args)
         except Database.OperationalError as e:
