@@ -10,3 +10,13 @@ class DatabaseFeatures(BaseDatabaseFeatures):
         'non_default': None,
         'swedish_ci': None,
     }
+
+    @cached_property
+    def django_test_skips(self):
+        skips = super().django_test_skips()
+        skips.update({
+            "MySQL strict_mode does'nt work on CyMySQL": {
+                'check_framework.test_database.test_database.DatabaseCheckTests'
+            }
+        })
+        return skips
