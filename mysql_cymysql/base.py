@@ -194,7 +194,7 @@ class DatabaseWrapper(BaseDatabaseWrapper):
     def get_connection_params(self):
         kwargs = {
             'conv': django_conversions,
-            'charset': 'utf8mb4',
+            'charset': 'utf8',
         }
         settings_dict = self.settings_dict
         if settings_dict['USER']:

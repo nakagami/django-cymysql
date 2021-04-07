@@ -11,17 +11,20 @@
 # situations, so it is recommended to run the test suite against as many
 # database backends as possible.  You may want to create a separate settings
 # file for each of the backends you test against.
+import os
 
 DATABASES = {
     'default': {
         'ENGINE': 'mysql_cymysql',
         'NAME': 'cymysql',
         'USER': 'root',
+        'PASSWORD': os.environ.get("MYSQL_ROOT_PASSWORD", ""),
     },
     'other': {
         'ENGINE': 'mysql_cymysql',
         'NAME': 'cymysql2',
         'USER': 'root',
+        'PASSWORD': os.environ.get("MYSQL_ROOT_PASSWORD", ""),
     }
 }
 
@@ -31,3 +34,5 @@ SECRET_KEY = "django_tests_secret_key"
 PASSWORD_HASHERS = (
     'django.contrib.auth.hashers.MD5PasswordHasher',
 )
+
+DEFAULT_AUTO_FIELD = 'django.db.models.AutoField'
