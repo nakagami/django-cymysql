@@ -16,7 +16,9 @@ class DatabaseFeatures(BaseDatabaseFeatures):
         skips = super().django_test_skips
         skips.update({
             "MySQL strict_mode does'nt work on CyMySQL": {
-                'check_framework.test_database.DatabaseCheckTests'
+                'check_framework.test_database.DatabaseCheckTests',
+                'backends.mysql.test_schema.SchemaEditorTests',
+
             }
         })
         return skips
