@@ -7,7 +7,7 @@ Requirements
 -------------
 
 * Django 1.10, 1.11, 2.0, 2.1, 2.2, 3.0, 3.1
-* CyMySQL (https://github.com/nakagami/CyMySQL) 0.9.3+
+* CyMySQL (https://github.com/nakagami/CyMySQL) 0.9.16+
 
 Installation
 ------------
