@@ -1,5 +1,5 @@
 from django.db.backends.mysql.features import DatabaseFeatures as BaseDatabaseFeatures
-
+from django.utils.functional import cached_property
 
 class DatabaseFeatures(BaseDatabaseFeatures):
     empty_fetchmany_value = []
